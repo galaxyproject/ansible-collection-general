@@ -1,0 +1,22 @@
+---
+
+- name: Create user groups (Solaris)
+  group:
+    name: "{{ item.group }}"
+    gid: "{{ item.gid | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  with_items: local_users
+  when: item.group is defined
+
+- name: Create users (Solaris)
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default(omit) }}"
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+    password: "{{ item.password | default('NP') }}"
+    update_password: "{{ item.update_password | default(omit) }}"
+  with_items: local_users

@@ -1,0 +1,13 @@
+---
+
+- name: Create users (non-Solaris)
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default(omit) }}"
+    uid: "{{ item.uid | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    home: "{{ item.home | default(omit) }}"
+    shell: "{{ item.shell | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  with_items: local_users
+  when: local_users is defined

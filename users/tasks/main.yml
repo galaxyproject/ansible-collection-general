@@ -1,17 +1,37 @@
 ---
 
-- name: Create users
-  user:
-    name: "{{ item.name }}"
-    comment: "{{ item.comment | default(omit) }}"
-    uid: "{{ item.uid | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
-    home: "{{ item.home | default(omit) }}"
-    shell: "{{ item.shell | default(omit) }}"
-    system: "{{ item.system | default(omit) }}"
-  with_items: local_users
-  when: local_users is defined
+- include: solaris.yml
+  when: local_users is defined and ansible_os_family == 'Solaris'
+
+- include: non-solaris.yml
+  when: local_users is defined and ansible_os_family != 'Solaris'
 
 - name: Set authorized keys
-  authorized_key: user={{ item.name }} key="{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}" exclusive=yes
+  authorized_key:
+    user: "{{ item.name }}"
+    key: "{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}"
+    exclusive: yes
   with_items: authorized_key_users
+  when: authorized_key_users is defined
+
+- name: Create .ssh directories if installing private keys
+  file:
+    path: "~{{ item.name }}/.ssh"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0755
+  with_items: private_key_users
+  when: private_key_users is defined
+
+- name: Install private keys
+  copy:
+    content: "{{ sshprivatekeys[item.1.key] }}"
+    dest: "~{{ item.0.name }}/.ssh/{{ item.1.file }}"
+    owner: "{{ item.0.name }}"
+    group: "{{ item.0.name }}"
+    mode: 0600
+  with_subelements:
+    - private_key_users
+    - keys
+  when: private_key_users is defined
