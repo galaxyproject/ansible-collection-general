@@ -1,0 +1,4 @@
+---
+
+- include: linux.yml
+  when: ansible_system == "Linux" and resolv_nameservers is defined
