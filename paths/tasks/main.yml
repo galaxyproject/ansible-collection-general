@@ -57,9 +57,24 @@
   when: zfs_filesystems is defined
 
 - name: Set ZFS mountpoint permissions
-  file: path={{ item.mountpoint | default("/" + item.name ) }} state=directory owner={{ item.owner | default('root') }} group={{ item.group | default('root') }} mode={{ item.mode | default('0755') }}
+  file:
+    path={{ item.mountpoint | default("/" + item.name ) }}
+    state=directory
+    owner={{ item.owner | default('root') }}
+    group={{ item.group | default('root') }}
+    mode={{ item.mode | default('0755') }}
   with_items: zfs_filesystems
   when: zfs_filesystems is defined
+
+- name: Set ZFS administrative permissions
+  zfs_permissions:
+    name: "{{ item.name }}"
+    state: "{{ item.state | default('present') }}"
+    users: "{{ item.users | default(omit) }}"
+    groups: "{{ item.groups | default(omit) }}"
+    permissions: "{{ item.permissions | default(omit) }}"
+  with_items: zfs_permissions
+  when: zfs_permissions is defined
 
 - name: Create directories
   file: path={{ item.path }}
