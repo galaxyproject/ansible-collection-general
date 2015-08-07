@@ -1,0 +1,7 @@
+---
+
+- name: refresh cron
+  service:
+    name: cron
+    state: reloaded
+  when: ansible_os_family == 'Solaris'
