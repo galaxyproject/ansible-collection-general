@@ -19,3 +19,11 @@
     - group_packages
     - host_packages
   when: ansible_os_family == "RedHat"
+
+- name: Install packages (pkgin)
+  pkgin: pkg={{ item }}
+  with_flattened:
+    - all_packages
+    - group_packages
+    - host_packages
+  when: ansible_distribution == "SmartOS"
