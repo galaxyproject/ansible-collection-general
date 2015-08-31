@@ -1,0 +1,12 @@
+---
+# Tasks related to remote management
+
+- name: Set serial console
+  lineinfile:
+    dest: /etc/default/grub.cfg
+    line: GRUB_CMDLINE_LINUX="console={{ linux_console }}"
+    regexp: "^GRUB_CMDLINE_LINUX=.*$"
+    backup: yes
+  notify:
+    - debian update-grub
+  when: linux_console is defined and ansible_os_family == "Debian"

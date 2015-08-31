@@ -1,0 +1,4 @@
+---
+
+- name: debian update-grub
+  command: /usr/sbin/update-grub
