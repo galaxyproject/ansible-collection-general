@@ -3,3 +3,6 @@
 all_packages: []
 group_packages: []
 host_packages: []
+all_apt_repositories: []
+group_apt_repositories: []
+host_apt_repositories: []

@@ -1,4 +1,11 @@
 ---
+- name: Add APT repositories
+  apt_repository: repo="{{ item }}" state=present
+  with_flattened:
+   - all_apt_repositories
+   - group_apt_repositories
+   - host_apt_repositories
+  when: ansible_os_family == "Debian"
 
 - name: Update APT cache
   apt: update_cache=yes cache_valid_time=3600
