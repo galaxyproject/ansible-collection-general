@@ -10,7 +10,7 @@
   authorized_key:
     user: "{{ item.name }}"
     key: "{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}"
-    exclusive: yes
+    exclusive: "{{ item.exclusive | default('yes') }}"
   with_items: authorized_key_users
   when: authorized_key_users is defined
 
