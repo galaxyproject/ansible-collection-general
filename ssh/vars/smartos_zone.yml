@@ -1,0 +1,4 @@
+---
+
+ssh_config_dir: /opt/local/etc/ssh
+ssh_service_name: openssh

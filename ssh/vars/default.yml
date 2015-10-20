@@ -1,0 +1,4 @@
+---
+
+ssh_config_dir: /etc/ssh
+ssh_service_name: ssh

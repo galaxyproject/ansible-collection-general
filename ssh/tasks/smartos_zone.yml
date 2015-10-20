@@ -1,0 +1,39 @@
+---
+
+- name: Install OpenSSH from pkgin
+  pkgin:
+    name: openssh
+
+- name: Set OpenSSH host keys to SunSSH host keys
+  lineinfile:
+    dest: "{{ ssh_config_dir }}/sshd_config"
+    line: "HostKey {{ item }}"
+    state: present
+    backup: yes
+  with_items:
+    - /var/ssh/ssh_host_rsa_key
+    - /var/ssh/ssh_host_dsa_key
+  notify:
+    - reload sshd
+
+- name: Disable motd printing
+  lineinfile:
+    dest: "{{ ssh_config_dir }}/sshd_config"
+    line: "PrintMotd no"
+    regexp: "^PrintMotd "
+    state: present
+    backup: yes
+  notify:
+    - reload sshd
+
+- name: Disable SunSSH
+  service:
+    name: ssh
+    state: stopped
+    enabled: no
+
+- name: Enable OpenSSH
+  service:
+    name: openssh
+    state: started
+    enabled: yes

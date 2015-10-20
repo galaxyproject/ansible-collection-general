@@ -1,13 +1,45 @@
 ---
 
+# Set ssh_sshd_config
+- name: Collect OS-specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}_{{ ansible_container | lower }}.yml"
+    - default.yml
+
+# Install OpenSSH on SmartOS zones
+- include: smartos_zone.yml
+  when: ansible_distribution == 'SmartOS' and ansible_container == 'zone'
+
 # Password auth is disabled in the EC2 Ubuntu AMIs
 - name: Enable SSH Password Authentication
-  lineinfile: dest=/etc/ssh/sshd_config state=present line="PasswordAuthentication yes" regexp="^PasswordAuthentication " backup=yes
+  lineinfile:
+    dest: "{{ ssh_config_dir }}/sshd_config"
+    line: "PasswordAuthentication yes"
+    regexp: "^PasswordAuthentication "
+    state: present
+    backup: yes
   notify:
     - reload sshd
 
 # Cloud instances typically have this set to no or without-password
 - name: Enable SSH Root Logins
-  lineinfile: dest=/etc/ssh/sshd_config state=present line="PermitRootLogin yes" regexp="^PermitRootLogin " backup=yes
+  lineinfile:
+    dest: "{{ ssh_config_dir }}/sshd_config"
+    line: "PermitRootLogin yes"
+    regexp: "^PermitRootLogin "
+    state: present
+    backup: yes
+  notify:
+    - reload sshd
+
+# Disable weak DH algorithms (https://weakdh.org/sysadmin.html)
+- name: Disable weak Diffie-Hellman algorithms
+  lineinfile:
+    dest: "{{ ssh_config_dir }}/sshd_config"
+    line: "KexAlgorithms curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1"
+    regexp: "^KexAlgorithms "
+    state: present
+    backup: yes
   notify:
     - reload sshd
