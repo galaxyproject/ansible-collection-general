@@ -1,0 +1,39 @@
+---
+
+# TODO: Inspect lower priority lists (host_files > group_files > all_files) and
+# do not copy lower priority files if the same `dest` is present in a higher
+# priority list
+
+- name: Copy files
+  copy:
+    backup: "{{ item.backup | default(omit) }}"
+    content: "{{ item.content | default(omit) }}"
+    dest: "{{ item.dest }}"
+    directory_mode: "{{ item.directory_mode | default(omit) }}"
+    follow: "{{ item.follow | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  with_flattened:
+    - all_files
+    - group_files
+    - host_files
+
+- name: Copy templates
+  template:
+    backup: "{{ item.backup | default(omit) }}"
+    dest: "{{ item.dest }}"
+    follow: "{{ item.follow | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  with_flattened:
+    - all_templates
+    - group_templates
+    - host_templates
