@@ -1,6 +1,28 @@
 ---
+
+- name: Add APT keys
+  apt_key:
+    data: "{{ item.data | default(omit) }}"
+    file: "{{ item.file | default(omit) }}"
+    id: "{{ item.id | default(omit) }}"
+    keyring: "{{ item.keyring | default(omit) }}"
+    keyserver: "{{ item.keyserver | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    url: "{{ item.url | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+  with_flattened:
+    - all_apt_keys
+    - group_apt_keys
+    - host_apt_keys
+  when: ansible_os_family == "Debian"
+
 - name: Add APT repositories
-  apt_repository: repo="{{ item }}" state=present
+  apt_repository:
+    mode: "{{ item.mode | default(omit) }}"
+    repo: "{{ item.repo }}"
+    state: "{{ item.state | default(omit) }}"
+    update_cache: "{{ item.update_cache | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
   with_flattened:
    - all_apt_repositories
    - group_apt_repositories
@@ -8,7 +30,9 @@
   when: ansible_os_family == "Debian"
 
 - name: Update APT cache
-  apt: update_cache=yes cache_valid_time=3600
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
 - name: Install packages (apt)
