@@ -1,5 +1,12 @@
 ---
 
+- name: Update cache and ensure apt-transport-https is installed
+  apt:
+    pkg: apt-transport-https
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
 - name: Add APT keys
   apt_key:
     data: "{{ item.data | default(omit) }}"
@@ -28,12 +35,12 @@
    - group_apt_repositories
    - host_apt_repositories
   when: ansible_os_family == "Debian"
+  register: apt_repository
 
-- name: Update APT cache
+- name: Update APT cache for repository addition
   apt:
     update_cache: yes
-    cache_valid_time: 3600
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and apt_repository.changed
 
 - name: Install packages (apt)
   apt: pkg={{ item }}
