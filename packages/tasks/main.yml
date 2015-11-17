@@ -37,6 +37,15 @@
   when: ansible_os_family == "Debian"
   register: apt_repository
 
+- name: Add YUM repositories
+  template:
+    src: yum.repo.j2
+    dest: "/etc/yum.repos.d/ansible-{{ item.name }}.repo"
+  with_flattened:
+    - all_yum_repositories
+    - group_yum_repositories
+    - host_yum_repositories
+
 - name: Update APT cache for repository addition
   apt:
     update_cache: yes
