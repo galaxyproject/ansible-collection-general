@@ -1,0 +1,14 @@
+---
+
+- name: Manage services
+  service:
+    name: "{{ item.name }}"
+    pattern: "{{ item.pattern | default(omit) }}"
+    arguments: "{{ item.arguments | default(omit) }}"
+    sleep: "{{ item.sleep | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    enabled: "{{ item.enabled | default(omit) }}"
+  with_flattened:
+    - all_services
+    - group_services
+    - host_services
