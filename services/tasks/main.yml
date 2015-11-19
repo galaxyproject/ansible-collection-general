@@ -1,5 +1,23 @@
 ---
 
+# Could do this with a parameterized role dep
+- name: Copy Solaris service configurations
+  copy:
+    backup: "{{ item.backup | default(omit) }}"
+    content: "{{ item.content | default(omit) }}"
+    dest: "{{ item.dest | default('/var/svc/manifest/site/' ~ item.src | basename) }}"
+    src: "{{ item.src | default(omit) }}"
+  register: copy_service_config_results
+  with_flattened:
+    - all_service_configurations
+    - group_service_configurations
+    - host_service_configurations
+
+- name: Import Solaris service configurations
+  command: /usr/sbin/svccfg import {{ item.dest }}
+  when: item.changed
+  with_items: "{{ copy_service_config_results.results }}"
+
 - name: Manage services
   service:
     name: "{{ item.name }}"

@@ -1,5 +1,8 @@
 ---
 
+all_service_configurations: []
+group_service_configurations: []
+host_service_configurations: []
 all_services: []
 group_services: []
 host_services: []
