@@ -16,7 +16,7 @@
 - name: Import Solaris service configurations
   command: /usr/sbin/svccfg import {{ item.dest }}
   when: item.changed
-  with_items: "{{ copy_service_config_results.results }}"
+  with_items: "{{ copy_service_config_results.results | default('[]') }}"
 
 - name: Manage services
   service:
