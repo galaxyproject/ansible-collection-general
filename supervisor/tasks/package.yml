@@ -1,0 +1,12 @@
+---
+
+- name: Set variables appropriate for package install type
+  include_vars: "{{ ansible_os_family | lower }}_package.yml"
+
+- name: Install supervisor (apt)
+  apt: name=supervisor
+  when: ansible_os_family == "Debian"
+
+- name: Install supervisor (yum)
+  yum: name=supervisor
+  when: ansible_os_family == "RedHat"
