@@ -6,6 +6,16 @@
 - include: non-solaris.yml
   when: local_users is defined and ansible_os_family != 'Solaris'
 
+- name: Ensure home directories exist for authorized_key
+  file:
+    path: "~{{ item.name }}"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
+    mode: 0755
+  with_items: authorized_key_users
+  when: authorized_key_users is defined
+
 - name: Set authorized keys
   authorized_key:
     user: "{{ item.name }}"
@@ -19,7 +29,7 @@
     path: "~{{ item.name }}/.ssh"
     state: directory
     owner: "{{ item.name }}"
-    group: "{{ item.name }}"
+    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
     mode: 0755
   with_items: private_key_users
   when: private_key_users is defined
