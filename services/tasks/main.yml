@@ -9,9 +9,9 @@
     src: "{{ item.src | default(omit) }}"
   register: copy_service_config_results
   with_flattened:
-    - all_service_configurations
-    - group_service_configurations
-    - host_service_configurations
+    - "{{ all_service_configurations }}"
+    - "{{ group_service_configurations }}"
+    - "{{ host_service_configurations }}"
 
 - name: Import Solaris service configurations
   command: /usr/sbin/svccfg import {{ item.dest }}
@@ -27,6 +27,6 @@
     state: "{{ item.state | default(omit) }}"
     enabled: "{{ item.enabled | default(omit) }}"
   with_flattened:
-    - all_services
-    - group_services
-    - host_services
+    - "{{ all_services }}"
+    - "{{ group_services }}"
+    - "{{ host_services }}"

@@ -18,9 +18,9 @@
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
   with_flattened:
-    - all_files
-    - group_files
-    - host_files
+    - "{{ all_files }}"
+    - "{{ group_files }}"
+    - "{{ host_files }}"
 
 - name: Copy templates
   template:
@@ -34,6 +34,6 @@
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
   with_flattened:
-    - all_templates
-    - group_templates
-    - host_templates
+    - "{{ all_templates }}"
+    - "{{ group_templates }}"
+    - "{{ host_templates }}"

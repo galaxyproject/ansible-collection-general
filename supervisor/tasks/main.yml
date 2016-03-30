@@ -12,13 +12,9 @@
 # (that's Ansible group, not supervisor group) config lists.
 - name: Install group supervisor configs for this host
   template: src=templates/supervisor/{{ item }}.j2 dest={{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}
-  with_items: supervisord_group_configs
-  notify:
-    - update supervisord
-
-- name: Install host supervisor configs for this host
-  template: src=templates/supervisor/{{ item }}.j2 dest={{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}
-  with_items: supervisord_host_configs
+  with_flattened:
+    - "{{ supervisord_group_configs }}"
+    - "{{ supervisord_host_configs }}"
   notify:
     - update supervisord
 

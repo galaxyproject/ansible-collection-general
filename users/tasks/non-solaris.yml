@@ -1,5 +1,15 @@
 ---
 
+- name: Create groups
+  group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    system: "{{ item.system | default(omit) }}"
+  with_flattened:
+    - "{{ all_groups }}"
+    - "{{ group_groups }}"
+    - "{{ host_groups }}"
+
 - name: Create users (non-Solaris)
   user:
     name: "{{ item.name }}"
@@ -10,5 +20,8 @@
     home: "{{ item.home | default(omit) }}"
     shell: "{{ item.shell | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
-  with_items: local_users
-  when: local_users is defined
+  with_flattened:
+    - "{{ all_users }}"
+    - "{{ group_users }}"
+    - "{{ host_users }}"
+    - "{{ local_users }}"

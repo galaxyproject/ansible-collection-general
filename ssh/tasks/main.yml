@@ -8,7 +8,7 @@
     - default.yml
 
 # Install OpenSSH on SmartOS zones
-- include: smartos_zone.yml
+- include: smartos_zone_openssh.yml
   when: ansible_distribution == 'SmartOS' and ansible_container == 'zone'
 
 - name: Set sshd_config options (group)
@@ -19,8 +19,8 @@
     state: present
     backup: yes
   with_flattened:
-    - ssh_all_sshd_config
-    - ssh_group_sshd_config
-    - ssh_host_sshd_config
+    - "{{ ssh_all_sshd_config }}"
+    - "{{ ssh_group_sshd_config }}"
+    - "{{ ssh_host_sshd_config }}"
   notify:
     - reload sshd

@@ -5,7 +5,7 @@
     name: "{{ item.group }}"
     gid: "{{ item.gid | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
-  with_items: local_users
+  with_items: "{{ local_users }}"
   when: item.group is defined
 
 - name: Create users (Solaris)
@@ -19,4 +19,4 @@
     system: "{{ item.system | default(omit) }}"
     password: "{{ item.password | default('NP') }}"
     update_password: "{{ item.update_password | default(omit) }}"
-  with_items: local_users
+  with_items: "{{ local_users }}"

@@ -2,18 +2,15 @@
 
 - name: Create mountpoints
   file: path={{ item.name }} state=directory owner={{ item.owner | default('root') }} group={{ item.group | default('root') }} mode={{ item.mode | default('0755') }}
-  with_items: filesystems
-  when: filesystems is defined
+  with_items: "{{ filesystems | default([]) }}"
 
 - name: Mount filesystems
   mount: name={{ item.name }} src={{ item.src }} fstype={{ item.fstype }} opts={{ item.opts | default(omit) }} state=mounted
-  with_items: filesystems
-  when: filesystems is defined
+  with_items: "{{ filesystems | default([]) }}"
 
 - name: Set mountpoint permissions
   file: path={{ item.name }} state=directory owner={{ item.owner | default('root') }} group={{ item.group | default('root') }} mode={{ item.mode | default('0755') }}
-  with_items: filesystems
-  when: filesystems is defined
+  with_items: "{{ filesystems | default([]) }}"
 
 - name: Create ZFS filesystems
   zfs: name={{ item.name }}
@@ -53,8 +50,7 @@
     vscan={{ item.vscan | default(omit) }}
     xattr={{ item.xattr | default(omit) }}
     zoned={{ item.zoned | default(omit) }}
-  with_items: zfs_filesystems
-  when: zfs_filesystems is defined
+  with_items: "{{ zfs_filesystems | default([]) }}"
 
 - name: Set ZFS mountpoint permissions
   file:
@@ -63,8 +59,7 @@
     owner={{ item.owner | default('root') }}
     group={{ item.group | default('root') }}
     mode={{ item.mode | default('0755') }}
-  with_items: zfs_filesystems
-  when: zfs_filesystems is defined
+  with_items: "{{ zfs_filesystems | default([]) }}"
 
 - name: Set ZFS administrative permissions
   zfs_permissions:
@@ -73,8 +68,7 @@
     users: "{{ item.users | default(omit) }}"
     groups: "{{ item.groups | default(omit) }}"
     permissions: "{{ item.permissions | default(omit) }}"
-  with_items: zfs_permissions
-  when: zfs_permissions is defined
+  with_items: "{{ zfs_permissions | default([]) }}"
 
 - name: Create directories
   file: path={{ item.path }}
@@ -83,5 +77,14 @@
     recurse={{ item.recurse | default(omit) }}
     mode={{ item.mode | default(omit) }}
     state="directory"
-  with_items: directories
-  when: directories is defined
+  with_items: "{{ directories | default([]) }}"
+
+- name: Create links
+  file: path={{ item.path }}
+    src={{ item.src }}
+    owner={{ item.owner | default(omit) }}
+    group={{ item.group | default(omit) }}
+    mode={{ item.mode | default(omit) }}
+    force={{ item.force | default(omit) }}
+    state="link"
+  with_items: "{{ links | default([]) }}"

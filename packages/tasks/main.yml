@@ -18,9 +18,9 @@
     url: "{{ item.url | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
   with_flattened:
-    - all_apt_keys
-    - group_apt_keys
-    - host_apt_keys
+    - "{{ all_apt_keys }}"
+    - "{{ group_apt_keys }}"
+    - "{{ host_apt_keys }}"
   when: ansible_os_family == "Debian"
 
 - name: Add APT repositories
@@ -31,9 +31,9 @@
     update_cache: "{{ item.update_cache | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
   with_flattened:
-   - all_apt_repositories
-   - group_apt_repositories
-   - host_apt_repositories
+   - "{{ all_apt_repositories }}"
+   - "{{ group_apt_repositories }}"
+   - "{{ host_apt_repositories }}"
   when: ansible_os_family == "Debian"
   register: apt_repository
 
@@ -42,9 +42,9 @@
     src: yum.repo.j2
     dest: "/etc/yum.repos.d/ansible-{{ item.name }}.repo"
   with_flattened:
-    - all_yum_repositories
-    - group_yum_repositories
-    - host_yum_repositories
+    - "{{ all_yum_repositories }}"
+    - "{{ group_yum_repositories }}"
+    - "{{ host_yum_repositories }}"
 
 - name: Update APT cache for repository addition
   apt:
@@ -54,23 +54,23 @@
 - name: Install packages (apt)
   apt: pkg={{ item }}
   with_flattened:
-    - all_packages
-    - group_packages
-    - host_packages
+    - "{{ all_packages }}"
+    - "{{ group_packages }}"
+    - "{{ host_packages }}"
   when: ansible_os_family == "Debian"
 
 - name: Install packages (yum)
   yum: pkg={{ item }}
   with_flattened:
-    - all_packages
-    - group_packages
-    - host_packages
+    - "{{ all_packages }}"
+    - "{{ group_packages }}"
+    - "{{ host_packages }}"
   when: ansible_os_family == "RedHat"
 
 - name: Install packages (pkgin)
   pkgin: pkg={{ item }}
   with_flattened:
-    - all_packages
-    - group_packages
-    - host_packages
+    - "{{ all_packages }}"
+    - "{{ group_packages }}"
+    - "{{ host_packages }}"
   when: ansible_distribution == "SmartOS"

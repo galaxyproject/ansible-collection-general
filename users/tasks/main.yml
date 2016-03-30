@@ -6,33 +6,35 @@
 - include: non-solaris.yml
   when: local_users is defined and ansible_os_family != 'Solaris'
 
-- name: Ensure home directories exist for authorized_key
-  file:
-    path: "~{{ item.name }}"
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
-    mode: 0755
-  with_items: authorized_key_users
-  when: authorized_key_users is defined
+# FIXME: apparently lookups used to be remote? Now they're local
+#- name: Ensure home directories exist for authorized_key
+#  file:
+#    path: "~{{ item.name }}"
+#    state: directory
+#    owner: "{{ item.name }}"
+#    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
+#    mode: 0755
+#  with_items: "{{ authorized_key_users }}"
+#  when: authorized_key_users is defined
 
 - name: Set authorized keys
   authorized_key:
     user: "{{ item.name }}"
     key: "{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}"
     exclusive: "{{ item.exclusive | default('yes') }}"
-  with_items: authorized_key_users
+  with_items: "{{ authorized_key_users }}"
   when: authorized_key_users is defined
 
-- name: Create .ssh directories if installing private keys
-  file:
-    path: "~{{ item.name }}/.ssh"
-    state: directory
-    owner: "{{ item.name }}"
-    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
-    mode: 0755
-  with_items: private_key_users
-  when: private_key_users is defined
+# FIXME: ditto
+#- name: Create .ssh directories if installing private keys
+#  file:
+#    path: "~{{ item.name }}/.ssh"
+#    state: directory
+#    owner: "{{ item.name }}"
+#    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
+#    mode: 0755
+#  with_items: "{{ private_key_users }}"
+#  when: private_key_users is defined
 
 - name: Install private keys
   copy:
@@ -42,6 +44,6 @@
     group: "{{ item.0.name }}"
     mode: 0600
   with_subelements:
-    - private_key_users
+    - "{{ private_key_users }}"
     - keys
   when: private_key_users is defined

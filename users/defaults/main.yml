@@ -2,3 +2,13 @@
 
 authorized_key_users: []
 private_key_users: []
+
+all_users: []
+group_users: []
+host_users: []
+# legacy usage
+local_users: []
+
+all_groups: []
+group_groups: []
+host_groups: []
