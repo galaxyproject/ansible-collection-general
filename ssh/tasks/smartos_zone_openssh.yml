@@ -1,5 +1,8 @@
 ---
 
+- name: Collect variables for OpenSSH on SmartOS
+  include_vars: smartos_zone.yml
+
 - name: Install OpenSSH from pkgin
   pkgin:
     name: openssh

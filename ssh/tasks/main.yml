@@ -4,12 +4,12 @@
 - name: Collect OS-specific variables
   include_vars: "{{ item }}"
   with_first_found:
-    - "{{ ansible_distribution | lower }}_{{ ansible_container | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
     - default.yml
 
 # Install OpenSSH on SmartOS zones
 - include: smartos_zone_openssh.yml
-  when: ansible_distribution == 'SmartOS' and ansible_container == 'zone'
+  when: ansible_distribution == 'SmartOS' and ansible_distribution_version < '16.1' and ansible_container == 'zone'
 
 - name: Set sshd_config options (group)
   lineinfile:
