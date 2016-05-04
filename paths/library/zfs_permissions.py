@@ -158,7 +158,13 @@ class ZfsPermissions(object):
                 elif line == 'Local+Descendent permissions:':
                     reading = 'ld'
                 elif line.startswith('\tuser '):
-                    user, cur_perms = line.split()[1:3]
+                    try:
+                        user, cur_perms = line.split()[1:3]
+                    except ValueError:
+                        # I have datasets with perms '        user  snapshot' that I cannot fix
+                        #                                         ^^ there should be a username
+                        #                                            but there's not, wtf
+                        continue
                     perms[reading]['u'][user] = cur_perms.split(',')
                 elif line.startswith('\tgroup '):
                     group, cur_perms = line.split()[1:3]
