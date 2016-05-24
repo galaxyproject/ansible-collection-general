@@ -8,6 +8,3 @@ supervisord_log_dir: /var/log/supervisord
 
 supervisord_inet_listen: 127.0.0.1
 supervisord_inet_port: 9001
-
-supervisord_group_configs: []
-supervisord_host_configs: []

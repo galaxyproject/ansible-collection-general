@@ -13,8 +13,8 @@
 - name: Install group supervisor configs for this host
   template: src=templates/supervisor/{{ item }}.j2 dest={{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}
   with_flattened:
-    - "{{ supervisord_group_configs }}"
-    - "{{ supervisord_host_configs }}"
+    - "{{ supervisord_group_configs | default([]) }}"
+    - "{{ supervisord_host_configs | default([]) }}"
   notify:
     - update supervisord
 
