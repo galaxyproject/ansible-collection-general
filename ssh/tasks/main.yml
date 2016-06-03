@@ -4,6 +4,7 @@
 - name: Collect OS-specific variables
   include_vars: "{{ item }}"
   with_first_found:
+    - "{{ ansible_os_family | lower }}.yml"
     - "{{ ansible_distribution | lower }}.yml"
     - default.yml
 

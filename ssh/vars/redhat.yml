@@ -1,4 +1,5 @@
 ---
 
 # CentOS 7 anyway. Not sure about 6.
+ssh_config_dir: /etc/ssh
 ssh_service_name: sshd
