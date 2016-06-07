@@ -8,9 +8,10 @@
     - "{{ ansible_distribution | lower }}.yml"
     - default.yml
 
+# This is no longer necessary as the base image sshd has been updated
 # Install OpenSSH on SmartOS zones
-- include: smartos_zone_openssh.yml
-  when: ansible_distribution == 'SmartOS' and ansible_distribution_version < '16.1' and ansible_container == 'zone'
+#- include: smartos_zone_openssh.yml
+#  when: ansible_distribution == 'SmartOS' and ansible_distribution_version < '16.1' and ansible_container == 'zone'
 
 - name: Set sshd_config options (group)
   lineinfile:
