@@ -1,0 +1,20 @@
+---
+
+- name: Manage firewall rules
+  firewalld:
+    immediate: "{{ item.immediate | default(omit) }}"
+    interface: "{{ item.interface | default(omit) }}"
+    masquerade: "{{ item.masquerade | default(omit) }}"
+    permanent: "{{ item.permanent | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    rich_rule: "{{ item.rich_rule | default(omit) }}"
+    service: "{{ item.service | default(omit) }}"
+    source: "{{ item.source | default(omit) }}"
+    state: "{{ item.state }}"
+    timeout: "{{ item.timeout | default(omit) }}"
+    zone: "{{ item.zone | default(omit) }}"
+  with_flattened:
+    - "{{ all_firewall_rules }}"
+    - "{{ group_firewall_rules }}"
+    - "{{ host_firewall_rules }}"
+  when: ansible_os_family == "RedHat"
