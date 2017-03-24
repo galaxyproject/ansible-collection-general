@@ -45,6 +45,17 @@
     - "{{ all_yum_repositories }}"
     - "{{ group_yum_repositories }}"
     - "{{ host_yum_repositories }}"
+  when: item.state is undefined or item.state == 'present'
+
+- name: Remove YUM repositories
+  file:
+    path: "/etc/yum.repos.d/ansible-{{ item.name }}.repo"
+    state: absent
+  with_flattened:
+    - "{{ all_yum_repositories }}"
+    - "{{ group_yum_repositories }}"
+    - "{{ host_yum_repositories }}"
+  when: item.state is defined and item.state == 'absent'
 
 - name: Update APT cache for repository addition
   apt:
