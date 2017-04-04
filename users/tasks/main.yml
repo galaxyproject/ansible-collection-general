@@ -6,16 +6,22 @@
 - include: non-solaris.yml
   when: local_users is defined and ansible_os_family != 'Solaris'
 
-# FIXME: apparently lookups used to be remote? Now they're local
-#- name: Ensure home directories exist for authorized_key
-#  file:
-#    path: "~{{ item.name }}"
-#    state: directory
-#    owner: "{{ item.name }}"
-#    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
-#    mode: 0755
-#  with_items: "{{ authorized_key_users }}"
-#  when: authorized_key_users is defined
+- name: Collect user groups for authorized keys
+  command: id -gn {{ item.name }}
+  with_items: "{{ authorized_key_users }}"
+  when: authorized_key_users is defined
+  changed_when: no
+  register: authorized_key_groups_out
+
+- name: Ensure home directories exist for authorized_key
+  file:
+    path: "~{{ item.1.name }}"
+    state: directory
+    owner: "{{ item.1.name }}"
+    group: "{{ authorized_key_groups_out.results[item.0].stdout }}"
+    mode: 0755
+  with_indexed_items: "{{ authorized_key_users }}"
+  when: authorized_key_users is defined
 
 - name: Set authorized keys
   authorized_key:
@@ -25,16 +31,22 @@
   with_items: "{{ authorized_key_users }}"
   when: authorized_key_users is defined
 
-# FIXME: ditto
-#- name: Create .ssh directories if installing private keys
-#  file:
-#    path: "~{{ item.name }}/.ssh"
-#    state: directory
-#    owner: "{{ item.name }}"
-#    group: "{{ lookup('pipe', 'id -gn ' ~ item.name) }}"
-#    mode: 0755
-#  with_items: "{{ private_key_users }}"
-#  when: private_key_users is defined
+- name: Collect user groups for private keys
+  command: id -gn {{ item.name }}
+  with_items: "{{ private_key_users }}"
+  when: authorized_key_users is defined
+  changed_when: no
+  register: private_key_groups_out
+
+- name: Create .ssh directories if installing private keys
+  file:
+    path: "~{{ item.1.name }}/.ssh"
+    state: directory
+    owner: "{{ item.1.name }}"
+    group: "{{ private_key_groups_out.results[item.0].stdout }}"
+    mode: 0755
+  with_indexed_items: "{{ private_key_users }}"
+  when: private_key_users is defined
 
 - name: Install private keys
   copy:

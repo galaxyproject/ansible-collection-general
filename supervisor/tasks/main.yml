@@ -11,7 +11,9 @@
 # These are split into two lists so host configs need not override group
 # (that's Ansible group, not supervisor group) config lists.
 - name: Install group supervisor configs for this host
-  template: src=templates/supervisor/{{ item }}.j2 dest={{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}
+  template:
+    src: "templates/supervisor/{{ item }}.j2"
+    dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
   with_flattened:
     - "{{ supervisord_group_configs | default([]) }}"
     - "{{ supervisord_host_configs | default([]) }}"
@@ -19,4 +21,7 @@
     - update supervisord
 
 - name: Enable and start supervisord
-  service: name={{ supervisord_service_name }} enabled=yes state=started
+  service:
+    name: "{{ supervisord_service_name }}"
+    enabled: yes
+    state: started

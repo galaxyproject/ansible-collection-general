@@ -3,6 +3,7 @@
 supervisord_prefix: /usr
 supervisord_conf_path: /etc/supervisor/supervisord.conf
 supervisord_conf_dir: /etc/supervisor/conf.d
+supervisord_sock_path: /var/run/supervisor.sock
 supervisord_log_dir: /var/log/supervisor
 supervisord_conf_ext: conf
 supervisord_service_name: supervisor

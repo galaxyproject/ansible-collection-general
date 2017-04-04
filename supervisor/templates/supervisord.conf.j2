@@ -7,10 +7,12 @@
 [unix_http_server]
 file                            = /var/run/supervisor.sock
 
+{% if supervisord_inet_listen is defined -%}
 [inet_http_server]
 port                            = {{ supervisord_inet_listen }}:{{ supervisord_inet_port }}
 username                        = {{ supervisord_inet_user }}
 password                        = {SHA}{{ supervisord_inet_pass_sha }}
+{% endif %}
 
 [supervisord]
 logfile                         = /var/log/supervisord.log

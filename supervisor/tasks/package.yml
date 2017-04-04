@@ -4,9 +4,11 @@
   include_vars: "{{ ansible_os_family | lower }}_package.yml"
 
 - name: Install supervisor (apt)
-  apt: name=supervisor
+  apt:
+    name: supervisor
   when: ansible_os_family == "Debian"
 
 - name: Install supervisor (yum)
-  yum: name=supervisor
+  yum:
+    name: supervisor
   when: ansible_os_family == "RedHat"

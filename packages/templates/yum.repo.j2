@@ -1,8 +1,0 @@
-##
-## This file is maintained by Ansible - CHANGES WILL BE OVERWRITTEN
-##
-
-[{{ item.name }}-repo]
-{% for opt in item.contents %}
-{{ opt }}={{ item.contents[opt] }}
-{% endfor %}

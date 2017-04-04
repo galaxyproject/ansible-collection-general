@@ -4,7 +4,5 @@ supervisord_install: virtualenv
 supervisord_prefix: /opt/supervisor
 supervisord_conf_path: /etc/supervisord.conf
 supervisord_conf_dir: /etc/opt/supervisor
+supervisord_sock_path: /var/run/supervisor.sock
 supervisord_log_dir: /var/log/supervisord
-
-supervisord_inet_listen: 127.0.0.1
-supervisord_inet_port: 9001
