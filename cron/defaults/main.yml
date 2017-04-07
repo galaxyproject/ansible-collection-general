@@ -1,3 +1,6 @@
 ---
 
+all_crontabs: []
+group_crontabs: []
+host_crontabs: []
 crontabs: []

@@ -11,6 +11,9 @@
     month: "{{ item.month | default(omit) }}"
     weekday: "{{ item.weekday | default(omit) }}"
     job: "{{ item.job }}"
-  with_items: "{{ crontabs }}"
-  when: crontabs is defined
+  with_flattened:
+    - "{{ all_crontabs }}"
+    - "{{ group_crontabs }}"
+    - "{{ host_crontabs }}"
+    - "{{ crontabs }}"  # legacy
   notify: refresh cron
