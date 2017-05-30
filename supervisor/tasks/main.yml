@@ -16,6 +16,7 @@
     dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
   with_flattened:
     - "{{ supervisord_group_configs | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars['supervisord_' ~ group_name ~ '_group_configs'] ~ ', ' if 'supervisord_' ~ group_name ~ '_group_configs' in vars else None }}{% endfor %}]"
     - "{{ supervisord_host_configs | default([]) }}"
   notify:
     - update supervisord
