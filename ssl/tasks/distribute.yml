@@ -1,0 +1,70 @@
+---
+
+- name: Create CA cert directories
+  file:
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert_path | dirname }}"
+    state: directory
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+  when: item[0].ca_cert_path is defined
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"
+
+- name: Distribute CA cert
+  copy:
+    src: "{{ ssl_dir }}/ca.pem"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert_path }}"
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    mode: "0444"
+  when: item[0].ca_cert_path is defined
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"
+
+- name: Create cert directories
+  file:
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert_path | dirname }}"
+    state: directory
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"
+
+- name: Distribute cert
+  copy:
+    src: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert_path }}"
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    mode: "0444"
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"
+
+- name: Create key directories
+  file:
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key_path | dirname }}"
+    state: directory
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"
+
+- name: Set private key var name
+  set_fact:
+    ssl_key_var_name: "{{ ssl_cert.ca }}{{ '_' ~ inventory_hostname if ssl_cert.per_host is defined and ssl_cert.per_host else '' }}_{{ ssl_cert.name }}"
+
+- name: Distribute key
+  copy:
+    content: "{{ ssl_keys[ssl_key_var_name] }}"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key_path }}"
+    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    mode: "0400"
+  with_nested:
+    - "{{ ssl_cert.paths }}"
+    - "{{ ssl_cert.users | default(['']) }}"

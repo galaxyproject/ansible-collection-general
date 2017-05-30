@@ -1,0 +1,118 @@
+---
+
+- name: Create cert directory
+  file:
+    path: "{{ ssl_cert_dir }}"
+    state: directory
+
+- name: Generate key for cert '{{ ssl_cert.name }}' in CA '{{ ssl_cert.ca }}'
+  command: openssl genrsa 4096
+  register: ssl_key_out
+
+- name: Set private key facts
+  set_fact:
+    ssl_key: "{{ ssl_key_out.stdout }}"
+    ssl_key_var_name: "{{ ssl_cert.ca }}{{ '_' ~ inventory_hostname if ssl_cert.per_host is defined and ssl_cert.per_host else '' }}_{{ ssl_cert.name }}"
+    ssl_key_file_name: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}_privatekey.yml"
+
+- name: Create extfile
+  template:
+    src: extfile.cnf.j2
+    dest: "{{ ssl_cert_dir }}/extfile_{{ ssl_cert.name }}.cnf"
+  when: ssl_cert_def.ext is defined
+
+- name: Check for ca.srl
+  stat:
+    path: "{{ ssl_dir }}/ca.srl"
+  register: ssl_ca_srl_out
+
+- name: Write private key
+  copy:
+    content: "{{ ssl_key }}"
+    dest: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}_privatekey.pem"
+    mode: "0400"
+
+- block:
+
+    - name: Generate certificate request
+      command: >
+        openssl req -new -sha256
+        -subj '/C={{ ssl_cert_def.dn.country }}/ST={{ ssl_cert_def.dn.state }}/L={{ ssl_cert_def.dn.locality }}/O={{ ssl_cert_def.dn.organization }}/OU={{ ssl_cert_def.dn.organizational_unit }}/CN={{ ssl_cert_def.dn.common_name }}'
+        -key {{ ssl_cert_dir }}/{{ ssl_cert.name }}_privatekey.pem
+        -out {{ ssl_cert_dir }}/{{ ssl_cert.name }}.csr
+      args:
+        creates: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.csr"
+
+    - name: Create vault password tempfile
+      command: mktemp -t tmp.ansible_ssl_vaultpass_XXXXXXXXXX
+      register: ssl_vaultpass_mktemp_out
+
+    - name: Create CA key tempfile
+      command: mktemp -t tmp.ansible_ssl_cakey_XXXXXXXXXX
+      register: ssl_cakey_mktemp_out
+
+    - block:
+
+        - name: Write vault password
+          copy:
+            content: "{{ ssl_vault_pass }}"
+            dest: "{{ ssl_vaultpass_mktemp_out.stdout }}"
+            mode: "0600"
+
+        - name: Unvault CA key
+          command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} decrypt --output={{ ssl_cakey_mktemp_out.stdout }} {{ ssl_dir }}/ca-key.pem
+
+        - name: Sign certificate request
+          command: >
+            openssl x509 -req -days 365 -sha256
+              -in {{ ssl_cert_dir }}/{{ ssl_cert.name }}.csr
+              -CA {{ ssl_dir }}/ca.pem
+              -CAkey {{ ssl_cakey_mktemp_out.stdout }}
+              {{ '-CAcreateserial' if not ssl_ca_srl_out.stat.exists else '-CAserial ' ~ ssl_dir ~ '/ca.srl' }}
+              -out {{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem
+              {{ '-extfile ' ~ ssl_cert_dir ~ '/extfile_' ~ ssl_cert.name ~ '.cnf' if ssl_cert_def.ext else '' }}
+          args:
+            creates: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
+
+        - name: Write private key vars file
+          copy:
+            content: |
+              ---
+              {{ ssl_key_var_name }}: |
+                {{ ssl_key | indent(width=2) }}
+            dest: "{{ ssl_key_file_name }}"
+            mode: "0600"
+
+        - name: Vault key vars file
+          command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} encrypt {{ ssl_key_file_name }}
+
+      rescue:
+
+        - name: Remove certificate and key on failure
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
+            - "{{ ssl_key_file_name }}"
+
+      always:
+
+        - name: Remove secret tempfiles
+          file:
+            path: "{{ item }}"
+            state: absent
+          with_items:
+            - "{{ ssl_vaultpass_mktemp_out.stdout }}"
+            - "{{ ssl_cakey_mktemp_out.stdout }}"
+
+  always:
+
+    - name: Remove temporary items
+      file:
+        path: "{{ ssl_cert_dir }}/{{ item }}"
+        state: absent
+      with_items:
+        - "{{ ssl_cert.name }}_privatekey.pem"
+        - "{{ ssl_cert.name }}.csr"
+        - "extfile_{{ ssl_cert.name }}.cnf"

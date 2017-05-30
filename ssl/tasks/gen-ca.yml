@@ -1,0 +1,40 @@
+---
+
+- name: Create CA directory
+  file:
+    path: "{{ ssl_dir }}"
+    state: directory
+
+- name: Generate CA key
+  command: openssl genrsa -out {{ ssl_dir }}/ca-key.pem 4096
+  args:
+    creates: "{{ ssl_dir }}/ca-key.pem"
+
+- name: Generate CA cert
+  command: >
+    openssl req -new -x509 -days 1095 -sha256
+      -subj '/C={{ ssl_ca.dn.country }}/ST={{ ssl_ca.dn.state }}/L={{ ssl_ca.dn.locality }}/O={{ ssl_ca.dn.organization }}/OU={{ ssl_ca.dn.organizational_unit }}/CN={{ ssl_ca.dn.common_name }}'
+      -key {{ ssl_dir }}/ca-key.pem
+      -out {{ ssl_dir }}/ca.pem
+
+- name: Create vault password tempfile
+  command: mktemp -t tmp.ansible_ssl_XXXXXXXXXX
+  register: ssl_vaultpass_mktemp_out
+
+- block:
+
+    - name: Write vault password
+      copy:
+        content: "{{ ssl_vault_pass }}"
+        dest: "{{ ssl_vaultpass_mktemp_out.stdout }}"
+        mode: "0600"
+
+    - name: Vault CA key
+      command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} encrypt {{ ssl_dir }}/ca-key.pem
+
+  always:
+
+    - name: Remove vault password tempfile
+      file:
+        path: "{{ ssl_vaultpass_mktemp_out.stdout }}"
+        state: absent

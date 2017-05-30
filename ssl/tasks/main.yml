@@ -1,0 +1,56 @@
+---
+
+- name: Include SSL CA tasks
+  include: ca.yml
+  vars:
+    ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
+    ssl_ca: "{{ ssl_cas[cert_item.ca] | default('') }}"
+    ssl_cert: "{{ cert_item }}"
+    ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
+  delegate_to: localhost
+  run_once: true
+  serial: 1   # basically used for locking purposes
+  with_flattened:
+    - "{{ ssl_all_certs | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
+    - "{{ ssl_host_certs | default([]) }}"
+  loop_control:
+    loop_var: cert_item
+  when: ssl_cas[cert_item.ca] is defined
+
+- name: Include SSL cert tasks
+  include: cert.yml
+  vars:
+    ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
+    ssl_cert_dir: "{{ ssl_dir }}{{ '/' ~ inventory_hostname if cert_item.per_host is defined and cert_item.per_host else '' }}"
+    ssl_ca: "{{ ssl_cas[cert_item.ca] | default('') }}"
+    ssl_cert: "{{ cert_item }}"
+    ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
+  delegate_to: localhost
+  with_flattened:
+    - "{{ ssl_all_certs | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
+    - "{{ ssl_host_certs | default([]) }}"
+  loop_control:
+    loop_var: cert_item
+  when: ssl_cas[cert_item.ca] is defined
+
+- name: Load private keys
+  include_vars:
+    dir: "{{ inventory_dir }}/files/ssl/"
+    files_matching: ".*_privatekey.yml$"
+    name: ssl_keys
+
+- name: Distribute certs
+  include: distribute.yml
+  vars:
+    ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
+    ssl_cert_dir: "{{ ssl_dir }}{{ '/' ~ inventory_hostname if cert_item.per_host is defined and cert_item.per_host else '' }}"
+    ssl_cert: "{{ cert_item }}"
+  delegate_to: localhost
+  with_flattened:
+    - "{{ ssl_all_certs | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
+    - "{{ ssl_host_certs | default([]) }}"
+  loop_control:
+    loop_var: cert_item
