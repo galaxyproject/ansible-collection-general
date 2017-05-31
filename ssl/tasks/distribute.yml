@@ -4,8 +4,8 @@
   file:
     path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert | dirname }}"
     state: directory
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
   when: item[0].ca_cert is defined
   with_nested:
     - "{{ ssl_cert.paths }}"
@@ -15,8 +15,8 @@
   copy:
     src: "{{ ssl_dir }}/ca.pem"
     dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert }}"
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
     mode: "0444"
   when: item[0].ca_cert is defined
   with_nested:
@@ -27,8 +27,8 @@
   file:
     path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert | dirname }}"
     state: directory
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
   with_nested:
     - "{{ ssl_cert.paths }}"
     - "{{ ssl_cert.users | default(['']) }}"
@@ -37,8 +37,8 @@
   copy:
     src: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
     dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert }}"
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
     mode: "0444"
   with_nested:
     - "{{ ssl_cert.paths }}"
@@ -48,8 +48,8 @@
   file:
     path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key | dirname }}"
     state: directory
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
   with_nested:
     - "{{ ssl_cert.paths }}"
     - "{{ ssl_cert.users | default(['']) }}"
@@ -62,8 +62,8 @@
   copy:
     content: "{{ ssl_keys[ssl_key_var_name] }}"
     dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key }}"
-    owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
-    group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
+    owner: "{{ ssl_cert.owner | default(omit) if not item[1] else item[1] }}"
+    group: "{{ ssl_cert.group | default(omit) if not item[1] else omit }}"
     mode: "0400"
   with_nested:
     - "{{ ssl_cert.paths }}"
