@@ -49,7 +49,6 @@
     ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
     ssl_cert_dir: "{{ ssl_dir }}{{ '/' ~ inventory_hostname if cert_item.per_host is defined and cert_item.per_host else '' }}"
     ssl_cert: "{{ cert_item }}"
-  delegate_to: localhost
   with_flattened:
     - "{{ ssl_role_certs | default([]) }}"
     - "{{ ssl_all_certs | default([]) }}"
