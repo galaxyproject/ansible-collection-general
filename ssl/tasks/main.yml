@@ -11,6 +11,7 @@
   run_once: true
   serial: 1   # basically used for locking purposes
   with_flattened:
+    - "{{ ssl_role_certs | default([]) }}"  # for use with the include_role task
     - "{{ ssl_all_certs | default([]) }}"
     - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
     - "{{ ssl_host_certs | default([]) }}"
@@ -28,6 +29,7 @@
     ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
   delegate_to: localhost
   with_flattened:
+    - "{{ ssl_role_certs | default([]) }}"
     - "{{ ssl_all_certs | default([]) }}"
     - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
     - "{{ ssl_host_certs | default([]) }}"
@@ -49,6 +51,7 @@
     ssl_cert: "{{ cert_item }}"
   delegate_to: localhost
   with_flattened:
+    - "{{ ssl_role_certs | default([]) }}"
     - "{{ ssl_all_certs | default([]) }}"
     - "[{% for group_name in group_names %}{{ vars['ssl_' ~ group_name ~ '_group_certs'] ~ ', ' if 'ssl_' ~ group_name ~ '_group_certs' in vars else None }}{% endfor %}]"
     - "{{ ssl_host_certs | default([]) }}"

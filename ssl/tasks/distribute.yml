@@ -2,11 +2,11 @@
 
 - name: Create CA cert directories
   file:
-    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert_path | dirname }}"
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert | dirname }}"
     state: directory
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
-  when: item[0].ca_cert_path is defined
+  when: item[0].ca_cert is defined
   with_nested:
     - "{{ ssl_cert.paths }}"
     - "{{ ssl_cert.users | default(['']) }}"
@@ -14,18 +14,18 @@
 - name: Distribute CA cert
   copy:
     src: "{{ ssl_dir }}/ca.pem"
-    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert_path }}"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].ca_cert }}"
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
     mode: "0444"
-  when: item[0].ca_cert_path is defined
+  when: item[0].ca_cert is defined
   with_nested:
     - "{{ ssl_cert.paths }}"
     - "{{ ssl_cert.users | default(['']) }}"
 
 - name: Create cert directories
   file:
-    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert_path | dirname }}"
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert | dirname }}"
     state: directory
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
@@ -36,7 +36,7 @@
 - name: Distribute cert
   copy:
     src: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
-    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert_path }}"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].cert }}"
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
     mode: "0444"
@@ -46,7 +46,7 @@
 
 - name: Create key directories
   file:
-    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key_path | dirname }}"
+    path: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key | dirname }}"
     state: directory
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
@@ -61,7 +61,7 @@
 - name: Distribute key
   copy:
     content: "{{ ssl_keys[ssl_key_var_name] }}"
-    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key_path }}"
+    dest: "{{ '~' ~ item[1] ~ '/' if item[1] else '' }}{{ item[0].key }}"
     owner: "{{ item[0].owner | default(omit) if not item[1] else item[1] }}"
     group: "{{ item[0].group | default(omit) if not item[1] else omit }}"
     mode: "0400"
