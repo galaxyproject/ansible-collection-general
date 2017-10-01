@@ -20,6 +20,7 @@
   with_flattened:
     - "{{ all_files }}"
     - "{{ group_files }}"
+    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_files'] ~ ', ' if group_name ~ '_group_files' in vars else None }}{% endfor %}]"
     - "{{ host_files }}"
 
 - name: Copy templates
@@ -36,4 +37,5 @@
   with_flattened:
     - "{{ all_templates }}"
     - "{{ group_templates }}"
+    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_templates'] ~ ', ' if group_name ~ '_group_templates' in vars else None }}{% endfor %}]"
     - "{{ host_templates }}"
