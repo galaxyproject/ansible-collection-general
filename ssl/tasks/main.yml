@@ -8,6 +8,7 @@
     ssl_cert: "{{ cert_item }}"
     ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
   delegate_to: localhost
+  become: false
   run_once: true
   serial: 1   # basically used for locking purposes
   with_flattened:
@@ -28,6 +29,7 @@
     ssl_cert: "{{ cert_item }}"
     ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
   delegate_to: localhost
+  become: false
   with_flattened:
     - "{{ ssl_role_certs | default([]) }}"
     - "{{ ssl_all_certs | default([]) }}"
