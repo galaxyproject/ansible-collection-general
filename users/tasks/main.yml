@@ -1,10 +1,10 @@
 ---
 
 - include: solaris.yml
-  when: local_users is defined and ansible_os_family == 'Solaris'
+  when: ansible_os_family == 'Solaris'
 
 - include: non-solaris.yml
-  when: local_users is defined and ansible_os_family != 'Solaris'
+  when: ansible_os_family != 'Solaris'
 
 - name: Collect user groups for authorized keys
   command: id -gn {{ item.name }}

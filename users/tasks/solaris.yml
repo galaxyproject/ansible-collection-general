@@ -5,7 +5,13 @@
     name: "{{ item.group }}"
     gid: "{{ item.gid | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
-  with_items: "{{ local_users }}"
+    state: "{{ item.state | default(omit) }}"
+  with_flattened:
+    - "{{ all_users | default([]) }}"
+    - "{{ group_users | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_users'] ~ ', ' if group_name ~ '_group_users' in vars else None }}{% endfor %}]"
+    - "{{ host_users | default([]) }}"
+    - "{{ local_users | default([]) }}"  # legacy
   when: item.group is defined
 
 - name: Create users (Solaris)
@@ -19,4 +25,10 @@
     system: "{{ item.system | default(omit) }}"
     password: "{{ item.password | default('NP') }}"
     update_password: "{{ item.update_password | default(omit) }}"
-  with_items: "{{ local_users }}"
+    state: "{{ item.state | default(omit) }}"
+  with_flattened:
+    - "{{ all_users | default([]) }}"
+    - "{{ group_users | default([]) }}"
+    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_users'] ~ ', ' if group_name ~ '_group_users' in vars else None }}{% endfor %}]"
+    - "{{ host_users | default([]) }}"
+    - "{{ local_users | default([]) }}"  # legacy
