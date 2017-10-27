@@ -1,28 +1,6 @@
 ---
 
-_common_groups: >
-  {{ all_groups | default([]) }} + 
-  {{ group_groups | default([]) }} +
-  [{% for group_name in group_names %}{{ vars[group_name ~ '_group_groups'] ~ ', ' if group_name ~ '_group_groups' in vars else None }}{% endfor %}] +
-  {{ host_groups | default([]) }}
-
-_common_users: >
-  {{ all_users | default([]) }} + 
-  {{ group_users | default([]) }} +
-  [{% for group_name in group_names %}{{ vars[group_name ~ '_group_users'] ~ ', ' if group_name ~ '_group_users' in vars else None }}{% endfor %}] +
-  {{ host_users | default([]) }} +
-  {{ local_users | default([]) }}  # legacy
-
-_common_authorized_key_users: >
-  {{ all_authorized_key_users | default([]) }} +
-  {{ group_authorized_key_users | default([]) }} +
-  [{% for group_name in group_names %}{{ vars[group_name ~ '_group_authorized_key_users'] ~ ', ' if group_name ~ '_group_authorized_key_users' in vars else None }}{% endfor %}] +
-  {{ host_authorized_key_users | default([]) }} +
-  {{ authorized_key_users | default([]) }}  # legacy
-
-_common_private_key_users: >
-  {{ all_private_key_users | default([]) }} +
-  {{ group_private_key_users | default([]) }} +
-  [{% for group_name in group_names %}{{ vars[group_name ~ '_group_private_key_users'] ~ ', ' if group_name ~ '_group_private_key_users' in vars else None }}{% endfor %}] +
-  {{ host_private_key_users | default([]) }} +
-  {{ private_key_users | default([]) }}  # legacy
+_common_groups: "{{ 'groups' | chain_vars(vars) }}"
+_common_users: "{{ 'users' | chain_vars(vars) }}"
+_common_authorized_key_users: "{{ 'authorized_key_users' | chain_vars(vars) | subelement_union('name', 'authorized')  }}"
+_common_private_key_users: "{{ 'private_key_users' | chain_vars(vars) | subelement_union('name', 'keys')  }}"

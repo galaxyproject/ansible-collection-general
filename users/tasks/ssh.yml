@@ -43,8 +43,8 @@
 
 - name: Install private keys
   copy:
-    content: "{{ sshprivatekeys[item.key] }}"
-    dest: "~{{ item.0.name }}/.ssh/{{ item.file }}"
+    content: "{{ sshprivatekeys[item.1.key] }}"
+    dest: "~{{ item.0.name }}/.ssh/{{ item.1.file }}"
     owner: "{{ item.0.name }}"
     group: "{{ item.0.name }}"
     mode: 0600
