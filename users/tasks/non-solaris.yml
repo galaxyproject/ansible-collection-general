@@ -6,7 +6,7 @@
     gid: "{{ item.gid | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  with_items: "{{ _common_groups }}"
+  with_inheritance_chain: "groups"
 
 - name: Add/remove users (non-Solaris)
   user:
@@ -19,4 +19,4 @@
     shell: "{{ item.shell | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  with_items: "{{ _common_users }}"
+  with_inheritance_chain: "users"

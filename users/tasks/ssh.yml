@@ -1,8 +1,13 @@
 ---
 
+- name: Merge inheritance chain variables
+  set_fact:
+    common_authorized_key_users: "{{ lookup('inheritance_chain', 'authorized_key_users') | subelement_union('name', 'authorized') }}"
+    common_private_key_users: "{{ lookup('inheritance_chain', 'private_key_users') | subelement_union('name', 'keys') }}"
+
 - name: Collect user groups for authorized keys
   command: id -gn {{ item.name }}
-  with_items: "{{ _common_authorized_key_users }}"
+  with_items: "{{ common_authorized_key_users }}"
   changed_when: no
   register: authorized_key_groups_out
 
@@ -12,7 +17,6 @@
     state: directory
     owner: "{{ item.item.name }}"
     group: "{{ item.stdout }}"
-    mode: 0755
   with_items: "{{ authorized_key_groups_out.results }}"
   loop_control:
     label: "{{ item.item.name }}"
@@ -22,11 +26,11 @@
     user: "{{ item.name }}"
     key: "{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}"
     exclusive: "{{ item.exclusive | default('yes') }}"
-  with_items: "{{ _common_authorized_key_users }}"
+  with_items: "{{ common_authorized_key_users }}"
 
 - name: Collect user groups for private keys
   command: id -gn {{ item.name }}
-  with_items: "{{ _common_private_key_users }}"
+  with_items: "{{ common_private_key_users }}"
   changed_when: no
   register: private_key_groups_out
 
@@ -36,7 +40,6 @@
     state: directory
     owner: "{{ item.item.name }}"
     group: "{{ item.stdout }}"
-    mode: 0755
   with_items: "{{ private_key_groups_out.results }}"
   loop_control:
     label: "{{ item.item.name }}"
@@ -49,5 +52,5 @@
     group: "{{ item.0.name }}"
     mode: 0600
   with_subelements:
-    - "{{ _common_private_key_users }}"
+    - "{{ common_private_key_users }}"
     - keys

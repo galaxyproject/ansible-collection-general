@@ -1,6 +1,0 @@
----
-
-_common_groups: "{{ 'groups' | chain_vars(vars) }}"
-_common_users: "{{ 'users' | chain_vars(vars) }}"
-_common_authorized_key_users: "{{ 'authorized_key_users' | chain_vars(vars) | subelement_union('name', 'authorized')  }}"
-_common_private_key_users: "{{ 'private_key_users' | chain_vars(vars) | subelement_union('name', 'keys')  }}"
