@@ -1,0 +1,39 @@
+---
+
+# in lieu of a config lookup, which should exist some day, look up roles_path in ansible.cfg
+
+# there doesn't seem to be a variables for these things, this is *really* hacky and only works for our playbook structure
+- name: Get top level directory
+  set_fact:
+    cwd: "{{ playbook_dir ~ '/../..' }}"
+
+- name: Find required vars files
+  stat:
+    path: "{{ cwd }}/{{ item.0 }}/{{ item.1 }}/meta/required_vars.yml"
+  with_nested:
+    - "{{ lookup('ini', 'roles_path section=defaults file=' ~ cwd ~ '/ansible.cfg').split(':') | default(['roles']) | reverse | list }}"
+    - "{{ required_vars_roles | default([]) }}"
+  delegate_to: localhost
+  register: _ret_required_vars_stat
+
+# item.item = [ role_dir, role_name ]
+- name: Read required vars files
+  set_fact:
+    required_vars: "{{ required_vars | default({}) | combine({item.item[1]: {'name': item.item[1], 'vars': lookup('file', item.stat.path) | from_yaml}}) }}"
+  with_items: "{{ _ret_required_vars_stat.results }}"
+  loop_control:
+    label: "{{ item.item | join('/') }}"
+  when: item.stat.exists
+  delegate_to: localhost
+  register: _ret_required_vars
+
+# note "skipped" here will mean the var is defined
+- name: Fail if required vars are undefined
+  fail:
+    msg: "Required variable {{ item.1 }} of role {{ item.0.name }} is not defined"
+  with_subelements:
+    - "{{ required_vars }}"
+    - vars
+  loop_control:
+    label: "{{ item.1 }}"
+  when: item.1 not in vars
