@@ -46,6 +46,8 @@ class LookupModule(LookupBase):
             if t != _val:
                 display.vvvv('%s -> %s' % (_var, t))
             r.extend(t)
-        if not r:
-            raise AnsibleError("No inheritance chain variables exist for base '%s'" % base)
+        # this is actually not invalid if the name is valid, and there's no way
+        # to default in the playbook, so we'll just return an empty list here
+        #if not r:
+        #    raise AnsibleError("No inheritance chain variables exist for base '%s'" % base)
         return r
