@@ -1,3 +1,3 @@
-zfs_permissions awaiting review/merge:
+zfs_delegate_admin awaiting review/merge:
 
-    https://github.com/ansible/ansible-modules-extras/pull/791
+    https://github.com/ansible/ansible/pull/19240/files

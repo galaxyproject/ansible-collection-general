@@ -87,13 +87,13 @@
   with_items: "{{ zfs_filesystems | default([]) }}"
 
 - name: Set ZFS administrative permissions
-  zfs_permissions:
+  zfs_delegate_admin:
     name: "{{ item.name }}"
     state: "{{ item.state | default('present') }}"
     users: "{{ item.users | default(omit) }}"
     groups: "{{ item.groups | default(omit) }}"
     permissions: "{{ item.permissions | default(omit) }}"
-  with_items: "{{ zfs_permissions | default([]) }}"
+  with_items: "{{ zfs_admin_permissions | default([]) }}"
 
 - name: Create directories
   file:
