@@ -34,22 +34,25 @@
   changed_when: no
   register: private_key_groups_out
 
+- name: Set user group fact
+  set_fact:
+    private_key_user_groups: "{{ {} | combine({item.item.name: item.stdout}) }}"
+  with_items: "{{ private_key_groups_out.results }}"
+
 - name: Ensure ~/.ssh directories exist for installing private keys
   file:
-    path: "~{{ item.item.name }}"
+    path: "~{{ item.name }}"
     state: directory
-    owner: "{{ item.item.name }}"
-    group: "{{ item.stdout }}"
-  with_items: "{{ private_key_groups_out.results }}"
-  loop_control:
-    label: "{{ item.item.name }}"
+    owner: "{{ item.name }}"
+    group: "{{ private_key_user_groups[item.name] }}"
+  with_items: "{{ common_private_key_users }}"
 
 - name: Install private keys
   copy:
     content: "{{ sshprivatekeys[item.1.key] }}"
     dest: "~{{ item.0.name }}/.ssh/{{ item.1.file }}"
     owner: "{{ item.0.name }}"
-    group: "{{ item.0.name }}"
+    group: "{{ private_key_user_groups[item.0.name] }}"
     mode: 0600
   with_subelements:
     - "{{ common_private_key_users }}"
