@@ -19,6 +19,6 @@
       [inet_http_server]
       port                            = {{ supervisord_inet_listen }}:{{ supervisord_inet_port }}
       username                        = {{ supervisord_inet_user }}
-      password                        = {SHA}{{ supervisord_inet_pass_sha }}
+      password                        = {SHA}{{ supervisord_inet_pass | hash('sha1') }}
     dest: "{{ supervisord_conf_dir }}/05_inet_http_server.{{ supervisord_conf_ext }}"
   when: supervisord_inet_listen is defined

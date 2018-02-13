@@ -11,7 +11,7 @@ file                            = /var/run/supervisor.sock
 [inet_http_server]
 port                            = {{ supervisord_inet_listen }}:{{ supervisord_inet_port }}
 username                        = {{ supervisord_inet_user }}
-password                        = {SHA}{{ supervisord_inet_pass_sha }}
+password                        = {SHA}{{ supervisord_inet_pass | hash('sha1') }}
 {% endif %}
 
 [supervisord]
