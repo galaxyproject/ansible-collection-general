@@ -17,11 +17,7 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-  with_flattened:
-    - "{{ all_files }}"
-    - "{{ group_files }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_files'] ~ ', ' if group_name ~ '_group_files' in vars else None }}{% endfor %}]"
-    - "{{ host_files }}"
+  with_inheritance_chain: "files"
 
 - name: Copy templates
   template:
@@ -34,8 +30,4 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-  with_flattened:
-    - "{{ all_templates }}"
-    - "{{ group_templates }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_templates'] ~ ', ' if group_name ~ '_group_templates' in vars else None }}{% endfor %}]"
-    - "{{ host_templates }}"
+  with_inheritance_chain: "templates"

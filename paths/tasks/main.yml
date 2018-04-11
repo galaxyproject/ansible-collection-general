@@ -103,7 +103,7 @@
     recurse: "{{ item.recurse | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     state: "directory"
-  with_items: "{{ directories | default([]) }}"
+  with_inheritance_chain: "directories"
 
 - name: Create links
   file:
@@ -114,4 +114,4 @@
     mode: "{{ item.mode | default(omit) }}"
     force: "{{ item.force | default(omit) }}"
     state: "link"
-  with_items: "{{ links | default([]) }}"
+  with_inheritance_chain: "links"
