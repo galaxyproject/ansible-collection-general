@@ -17,6 +17,7 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
   with_inheritance_chain: "files"
 
 - name: Copy templates
@@ -30,4 +31,5 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
   with_inheritance_chain: "templates"

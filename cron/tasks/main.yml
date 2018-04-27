@@ -11,6 +11,7 @@
     month: "{{ item.month | default(omit) }}"
     weekday: "{{ item.weekday | default(omit) }}"
     job: "{{ item.job }}"
+    state: "{{ item.state | default(omit) }}"
   with_flattened:
     - "{{ all_crontabs }}"
     - "{{ group_crontabs }}"
