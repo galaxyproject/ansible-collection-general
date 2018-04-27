@@ -17,8 +17,15 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-    state: "{{ item.state | default(omit) }}"
   with_inheritance_chain: "files"
+  when: "item.state is not defined or item.state == 'present'"
+
+- name: Remove copy files with state=absent
+  file:
+    path: "{{ item.dest }}"
+    state: absent
+  with_inheritance_chain: "files"
+  when: "item.state is defined and item.state == 'absent'"
 
 - name: Copy templates
   template:
@@ -31,5 +38,11 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
-    state: "{{ item.state | default(omit) }}"
   with_inheritance_chain: "templates"
+
+- name: Remove template files with state=absent
+  file:
+    path: "{{ item.dest }}"
+    state: absent
+  with_inheritance_chain: "templates"
+  when: "item.state is defined and item.state == 'absent'"
