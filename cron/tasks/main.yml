@@ -12,9 +12,5 @@
     weekday: "{{ item.weekday | default(omit) }}"
     job: "{{ item.job }}"
     state: "{{ item.state | default(omit) }}"
-  with_flattened:
-    - "{{ all_crontabs }}"
-    - "{{ group_crontabs }}"
-    - "{{ host_crontabs }}"
-    - "{{ crontabs }}"  # legacy
+  with_inheritance_chain: "crontabs"
   notify: refresh cron
