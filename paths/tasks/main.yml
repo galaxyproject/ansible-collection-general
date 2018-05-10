@@ -76,6 +76,8 @@
     xattr: "{{ item.xattr | default(omit) }}"
     zoned: "{{ item.zoned | default(omit) }}"
   with_items: "{{ zfs_filesystems | default([]) }}"
+  environment:
+    PATH: /native/sbin:{{ ansible_env.PATH }}
 
 - name: Set ZFS mountpoint permissions
   file:
