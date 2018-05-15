@@ -46,3 +46,24 @@
     state: absent
   with_inheritance_chain: "templates"
   when: "item.state is defined and item.state == 'absent'"
+
+- name: Set lines in files
+  lineinfile:
+    attributes: "{{ item.attributes | default(omit) }}"
+    backrefs: "{{ item.backrefs | default(omit) }}"
+    backup: "{{ item.backup | default(omit) }}"
+    create: "{{ item.create | default(omit) }}"
+    firstmatch: "{{ item.firstmatch | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    insertbefore: "{{ item.insertbefore | default(omit) }}"
+    line: "{{ item.line | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
+    owner: "{{ item.owner | default(omit) }}"
+    path: "{{ item.path | default(item.dest) }}"
+    regexp: "{{ item.regexp | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
+    validate: "{{ item.validate | default(omit) }}"
+  with_inheritance_chain: "lines"
+  notify: "{{ item.notify | default([]) }}"
