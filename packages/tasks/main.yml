@@ -17,11 +17,7 @@
     state: "{{ item.state | default(omit) }}"
     url: "{{ item.url | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
-  with_flattened:
-    - "{{ all_apt_keys }}"
-    - "{{ group_apt_keys }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_apt_keys'] ~ ', ' if group_name ~ '_group_apt_keys' in vars else None }}{% endfor %}]"
-    - "{{ host_apt_keys }}"
+  with_inheritance_chain: "apt_keys"
   when: ansible_os_family == "Debian"
 
 - name: Add APT repositories
@@ -31,11 +27,7 @@
     state: "{{ item.state | default(omit) }}"
     update_cache: "{{ item.update_cache | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
-  with_flattened:
-   - "{{ all_apt_repositories }}"
-   - "{{ group_apt_repositories }}"
-   - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_apt_repositories'] ~ ', ' if group_name ~ '_group_apt_repositories' in vars else None }}{% endfor %}]"
-   - "{{ host_apt_repositories }}"
+  with_inheritance_chain: "apt_repositories"
   when: ansible_os_family == "Debian"
   register: apt_repository
 
@@ -99,22 +91,14 @@
     ui_repoid_vars: "{{ item.ui_repoid_vars | default(omit) }}"
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
     username: "{{ item.username | default(omit) }}"
-  with_flattened:
-    - "{{ all_yum_repositories }}"
-    - "{{ group_yum_repositories }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_yum_repositories'] ~ ', ' if group_name ~ '_group_yum_repositories' in vars else None }}{% endfor %}]"
-    - "{{ host_yum_repositories }}"
+  with_inheritance_chain: "yum_repositories"
   when: item.state is undefined or item.state == 'present'
 
 - name: Remove YUM repositories
   file:
     path: "/etc/yum.repos.d/ansible-{{ item.name }}.repo"
     state: absent
-  with_flattened:
-    - "{{ all_yum_repositories }}"
-    - "{{ group_yum_repositories }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_yum_repositories'] ~ ', ' if group_name ~ '_group_yum_repositories' in vars else None }}{% endfor %}]"
-    - "{{ host_yum_repositories }}"
+  with_inheritance_chain: "yum_repositories"
   when: item.state is defined and item.state == 'absent'
 
 - name: Update APT cache for repository addition
@@ -124,27 +108,15 @@
 
 - name: Install packages (apt)
   apt: pkg={{ item }}
-  with_flattened:
-    - "{{ all_packages }}"
-    - "{{ group_packages }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_packages'] ~ ', ' if group_name ~ '_group_packages' in vars else None }}{% endfor %}]"
-    - "{{ host_packages }}"
+  with_inheritance_chain: "packages"
   when: ansible_os_family == "Debian"
 
 - name: Install packages (yum)
   yum: pkg={{ item }}
-  with_flattened:
-    - "{{ all_packages }}"
-    - "{{ group_packages }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_packages'] ~ ', ' if group_name ~ '_group_packages' in vars else None }}{% endfor %}]"
-    - "{{ host_packages }}"
+  with_inheritance_chain: "packages"
   when: ansible_os_family == "RedHat"
 
 - name: Install packages (pkgin)
   pkgin: pkg={{ item }}
-  with_flattened:
-    - "{{ all_packages }}"
-    - "{{ group_packages }}"
-    - "[{% for group_name in group_names %}{{ vars[group_name ~ '_group_packages'] ~ ', ' if group_name ~ '_group_packages' in vars else None }}{% endfor %}]"
-    - "{{ host_packages }}"
+  with_inheritance_chain: "packages"
   when: ansible_distribution == "SmartOS"
