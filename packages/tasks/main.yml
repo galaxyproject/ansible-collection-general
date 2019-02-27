@@ -106,17 +106,6 @@
     update_cache: yes
   when: ansible_os_family == "Debian" and apt_repository.changed
 
-- name: Install packages (apt)
-  apt: pkg={{ item }}
-  with_inheritance_chain: "packages"
-  when: ansible_os_family == "Debian"
-
-- name: Install packages (yum)
-  yum: pkg={{ item }}
-  with_inheritance_chain: "packages"
-  when: ansible_os_family == "RedHat"
-
-- name: Install packages (pkgin)
-  pkgin: pkg={{ item }}
-  with_inheritance_chain: "packages"
-  when: ansible_distribution == "SmartOS"
+- name: Install packages
+  package:
+    name: "{{ lookup('inheritance_chain', 'packages') }}"
