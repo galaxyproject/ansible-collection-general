@@ -1,3 +1,5 @@
 ---
 
-timezone: America/New_York
+# IIRC there were packages on Debian that required a timezone to be set, but I don't recall which ones. Anyway, this
+# should default to UTC if we always set a timezone when the role is executed as it previously did.
+#timezone: America/New_York
