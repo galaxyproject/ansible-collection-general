@@ -32,7 +32,12 @@ class LookupModule(LookupBase):
         _vars = variables or {}
         base = terms[0]
         r = []
-        for prefix in ['all', 'group'] + [n.replace('-', '_') + '_group' for n in _vars['group_names']] + ['host']:
+        if 'override_' + base in _vars:
+            prefixes = ['override']
+        else:
+            prefixes = ['all', 'group', 'host']
+            prefixes[2:2] = [n.replace('-', '_') + '_group' for n in _vars['group_names']]
+        for prefix in prefixes:
             _var = prefix + '_' + base
             _val = _vars.get(_var, [])
             if _val:
