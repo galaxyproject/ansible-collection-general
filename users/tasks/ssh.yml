@@ -34,7 +34,7 @@
 
 - name: Ensure ~/.ssh directories exist for installing private keys
   file:
-    path: "~{{ item.name }}"
+    path: "~{{ item.name }}/.ssh"
     state: directory
     owner: "{{ item.name }}"
     group: "{{ private_key_user_groups[item.name] }}"
