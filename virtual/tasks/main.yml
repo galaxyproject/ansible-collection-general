@@ -1,4 +1,33 @@
 ---
 
 - name: Set hostname
-  hostname: name={{ inventory_hostname }}
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: Amazon EC2 tasks
+  block:
+
+    - name: Install nvme-cli on EC2 instances
+      include_role:
+        name: packages
+      vars:
+        override_packages:
+          - nvme-cli
+
+    - name: Install EC2 udev script
+      copy:
+        src: ebs-nvme-mapping.sh
+        dest: /sbin/ebs-nvme-mapping.sh
+        mode: "0755"
+      notify:
+        - trigger udevd
+
+    - name: Install EC2 udev rule
+      copy:
+        content: |
+          SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n[0-9]*", ATTRS{model}=="Amazon Elastic Block Store", PROGRAM+="/sbin/ebs-nvme-mapping.sh /dev/%k" SYMLINK+="%c"
+        dest: /etc/udev/rules.d/999-aws-ebs-nvme.rules
+      notify:
+        - trigger udevd
+
+  when: ansible_system_vendor == "Amazon EC2"
