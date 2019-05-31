@@ -1,27 +1,25 @@
 ---
 
-- name: Include tasks for virtualenv install type
-  include: virtualenv.yml
-  when: supervisord_install == "virtualenv"
+- name: Include tasks for install type
+  import_tasks: "{{ supervisord_install }}.yml"
 
-- name: Include tasks for package install type
-  include: package.yml
-  when: supervisord_install == "package"
-
-# These are split into two lists so host configs need not override group
-# (that's Ansible group, not supervisor group) config lists.
-- name: Install group supervisor configs for this host
+- name: Install supervisor configs
   template:
     src: "templates/supervisor/{{ item }}.j2"
     dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
-  with_flattened:
-    - "{{ supervisord_group_configs | default([]) }}"
-    - "[{% for group_name in group_names %}{{ vars['supervisord_' ~ group_name ~ '_group_configs'] ~ ', ' if 'supervisord_' ~ group_name ~ '_group_configs' in vars else None }}{% endfor %}]"
-    - "{{ supervisord_host_configs | default([]) }}"
+  with_inheritance_chain: "supervisor_configs"
   notify:
     - update supervisord
 
-- name: Enable and start supervisord
+- name: Remove supervisor configs
+  template:
+    src: "templates/supervisor/{{ item }}.j2"
+    dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
+  with_inheritance_chain: "absent_supervisor_configs"
+  notify:
+    - update supervisord
+
+- name: Ensure supervisord is enabled and running
   service:
     name: "{{ supervisord_service_name }}"
     enabled: yes
