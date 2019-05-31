@@ -1,7 +1,7 @@
 ---
 
 - name: Include tasks for install type
-  import_tasks: "{{ supervisord_install }}.yml"
+  include_tasks: "{{ supervisord_install }}.yml"
 
 - name: Install supervisor configs
   template:
@@ -12,9 +12,9 @@
     - update supervisord
 
 - name: Remove supervisor configs
-  template:
-    src: "templates/supervisor/{{ item }}.j2"
-    dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
+  file:
+    path: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
+    state: absent
   with_inheritance_chain: "absent_supervisor_configs"
   notify:
     - update supervisord
