@@ -1,10 +1,17 @@
 ---
 
-- name: Check CA cert existence
-  stat:
-    path: "{{ ssl_dir }}/ca.pem"
-  register: ssl_ca_cert_stat_out
+- name: CA cert tasks
+  block:
 
-- name: Include CA generation tasks
-  include: gen-ca.yml
-  when: not ssl_ca_cert_stat_out.stat.exists
+    - name: Check CA cert existence
+      stat:
+        path: "{{ ssl_dir }}/ca.pem"
+      register: ssl_ca_cert_stat_out
+
+    - name: Include CA generation tasks
+      include_tasks: gen-ca.yml
+      when: not ssl_ca_cert_stat_out.stat.exists
+
+  delegate_to: localhost
+  become: false
+  run_once: true

@@ -1,16 +1,13 @@
 ---
 
 - name: Include SSL CA tasks
-  include: ca.yml
+  include_tasks: ca.yml
   vars:
     ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
     ssl_ca: "{{ ssl_cas[cert_item.ca] | default('') }}"
     ssl_cert: "{{ cert_item }}"
     ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
-  delegate_to: localhost
-  become: false
-  run_once: true
-  serial: 1   # basically used for locking purposes
+  #serial: 1   # basically used for locking purposes
   with_flattened:
     - "{{ ssl_role_certs | default([]) }}"  # for use with the include_role task
     - "{{ ssl_all_certs | default([]) }}"
@@ -21,15 +18,13 @@
   when: ssl_cas[cert_item.ca] is defined
 
 - name: Include SSL cert tasks
-  include: cert.yml
+  include_tasks: cert.yml
   vars:
     ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
     ssl_cert_dir: "{{ ssl_dir }}{{ '/' ~ inventory_hostname if cert_item.per_host is defined and cert_item.per_host else '' }}"
     ssl_ca: "{{ ssl_cas[cert_item.ca] | default('') }}"
     ssl_cert: "{{ cert_item }}"
     ssl_cert_def: "{{ ssl_cas[cert_item.ca].certs[cert_item.name] | default('') }}"
-  delegate_to: localhost
-  become: false
   with_flattened:
     - "{{ ssl_role_certs | default([]) }}"
     - "{{ ssl_all_certs | default([]) }}"
@@ -46,7 +41,7 @@
     name: ssl_keys
 
 - name: Distribute certs
-  include: distribute.yml
+  include_tasks: distribute.yml
   vars:
     ssl_dir: "{{ inventory_dir }}/files/ssl{{ '/' ~ cert_item.ca | default('') }}"
     ssl_cert_dir: "{{ ssl_dir }}{{ '/' ~ inventory_hostname if cert_item.per_host is defined and cert_item.per_host else '' }}"

@@ -1,12 +1,18 @@
 ---
 
-- name: Check cert existence
-  stat:
-    path: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
-  run_once: "{{ false if cert_item.per_host is defined and cert_item.per_host else true }}"
-  register: ssl_cert_stat_out
+- name: Cert tasks
+  block:
 
-- name: Include cert generation tasks
-  include: gen-cert.yml
-  run_once: "{{ false if cert_item.per_host is defined and cert_item.per_host else true }}"
-  when: not ssl_cert_stat_out.stat.exists
+    - name: Check cert existence
+      stat:
+        path: "{{ ssl_cert_dir }}/{{ ssl_cert.name }}.pem"
+      run_once: "{{ false if cert_item.per_host is defined and cert_item.per_host else true }}"
+      register: ssl_cert_stat_out
+
+    - name: Include cert generation tasks
+      include_tasks: gen-cert.yml
+      run_once: "{{ false if cert_item.per_host is defined and cert_item.per_host else true }}"
+      when: not ssl_cert_stat_out.stat.exists
+
+  delegate_to: localhost
+  become: false
