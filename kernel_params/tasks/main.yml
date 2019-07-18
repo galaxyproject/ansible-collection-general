@@ -1,0 +1,11 @@
+---
+
+- name: Set kernel parameters
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: "{{ item.state | default(omit) }}"
+    reload: "{{ item.reload | default(omit) }}"
+    sysctl_file: /etc/sysctl.d/98-ansible.conf
+    sysctl_set: "{{ item.sysctl_set | default(omit) }}"
+  with_inheritance_chain: "kernel_params"
