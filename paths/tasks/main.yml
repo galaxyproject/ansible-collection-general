@@ -87,6 +87,7 @@
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0755') }}"
   with_items: "{{ zfs_filesystems | default([]) }}"
+  when: item.mountpoint.startswith('/') | default(true)
 
 - name: Set ZFS administrative permissions
   zfs_delegate_admin:
