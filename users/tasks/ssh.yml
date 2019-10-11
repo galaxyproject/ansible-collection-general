@@ -29,7 +29,7 @@
 
 - name: Set user group fact
   set_fact:
-    private_key_user_groups: "{{ {} | combine({item.item.name: item.stdout}) }}"
+    private_key_user_groups: "{{ (private_key_user_groups | default({})) | combine({item.item.name: item.stdout}) }}"
   with_items: "{{ private_key_groups_out.results }}"
 
 - name: Ensure ~/.ssh directories exist for installing private keys
