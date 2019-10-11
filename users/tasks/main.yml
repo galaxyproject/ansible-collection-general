@@ -1,9 +1,9 @@
 ---
 
-- include_tasks: solaris.yml
+- import_tasks: solaris.yml
   when: ansible_os_family == 'Solaris'
 
-- include_tasks: non-solaris.yml
+- import_tasks: non-solaris.yml
   when: ansible_os_family != 'Solaris'
 
-- include_tasks: ssh.yml
+- import_tasks: ssh.yml
