@@ -31,9 +31,9 @@
   file:
     path: "{{ item.path | default(item.name) }}"
     state: "directory"
-    owner: "{{ item.owner | default('root') }}"
-    group: "{{ item.group | default('root') }}"
-    mode: "{{ item.mode | default('0755') }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+    mode: "{{ item.mode | default(omit) }}"
   with_items: "{{ mounts | default([]) }}"
 
 - name: Create ZFS filesystems
