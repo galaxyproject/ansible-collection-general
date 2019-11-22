@@ -28,7 +28,7 @@ def _try_keys(i, kk, vk):
             # will raise KeyError if either key doesn't exist
             return (i[kk], i[vk])
         if isinstance(i, dict):
-            return (i.keys()[0], i.values()[0])
+            return (list(i.keys())[0], list(i.values())[0])
         else:
             raise TypeError()
     except Exception as exc:
