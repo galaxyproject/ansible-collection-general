@@ -15,9 +15,6 @@
     regexp: "^{{ item.option }} "
     state: present
     backup: yes
-  with_flattened:
-    - "{{ ssh_all_sshd_config }}"
-    - "{{ ssh_group_sshd_config }}"
-    - "{{ ssh_host_sshd_config }}"
+  with_inheritance_chain: sshd_config
   notify:
     - reload sshd
