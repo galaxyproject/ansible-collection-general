@@ -3,6 +3,7 @@
 - name: Set hostname
   hostname:
     name: "{{ inventory_hostname }}"
+    use: "{{ hostname_strategy |default(omit) }}"
 
 - name: Amazon EC2 tasks
   block:
@@ -31,3 +32,14 @@
         - trigger udevd
 
   when: ansible_system_vendor == "Amazon EC2"
+
+- name: SmartOS LX Brand tasks
+  block:
+
+    - name: Hold back systemd
+      dpkg_selections:
+        name: systemd
+        selection: hold
+      when: ansible_os_family == "Debian"
+
+  when: ansible_system == "Linux" and ansible_virtualization_type == "zone"
