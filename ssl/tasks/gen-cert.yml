@@ -60,7 +60,7 @@
             mode: "0600"
 
         - name: Unvault CA key
-          command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} decrypt --output={{ ssl_cakey_mktemp_out.stdout }} {{ ssl_dir }}/ca-key.pem
+          command: ansible-vault decrypt --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} --output={{ ssl_cakey_mktemp_out.stdout }} {{ ssl_dir }}/ca-key.pem
 
         - name: Sign certificate request
           command: >
@@ -84,7 +84,7 @@
             mode: "0600"
 
         - name: Vault key vars file
-          command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} encrypt {{ ssl_key_file_name }}
+          command: ansible-vault encrypt --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} {{ ssl_key_file_name }}
 
       rescue:
 

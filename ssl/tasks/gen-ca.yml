@@ -30,7 +30,7 @@
         mode: "0600"
 
     - name: Vault CA key
-      command: ansible-vault --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} encrypt {{ ssl_dir }}/ca-key.pem
+      command: ansible-vault encrypt --vault-password-file={{ ssl_vaultpass_mktemp_out.stdout }} {{ ssl_dir }}/ca-key.pem
 
   always:
 
