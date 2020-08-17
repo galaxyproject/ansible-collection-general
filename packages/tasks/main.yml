@@ -31,6 +31,16 @@
   when: ansible_os_family == "Debian"
   register: apt_repository
 
+# NOTE: RPM signing keys are different than YUM signing keys (which go in gpgkey in yum_repository)
+- name: Add RPM keys
+  rpm_key:
+    key: "{{ item.key }}"
+    fingerprint: "{{ item.fingerprint | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    validate_certs: "{{ item.validate_certs | default(omit) }}"
+  with_inheritance_chain: "rpm_keys"
+  when: ansible_os_family == "RedHat"
+
 - name: Add YUM repositories
   yum_repository:
     name: "{{ item.name }}"
@@ -93,6 +103,14 @@
     username: "{{ item.username | default(omit) }}"
   with_inheritance_chain: "yum_repositories"
   when: item.state is undefined or item.state == 'present'
+  register: _yum_repositories_results
+
+# This step is necessary to import YUM repo (note: NOT rpm) signing keys
+#   https://github.com/ansible/ansible/issues/20711
+- name: Update cache and import keys for updated yum repos
+  command: "yum -q makecache -y --disablerepo=* --enablerepo={{ item.item.name }}"
+  with_items: "{{ _yum_repositories_results.results }}"
+  when: item is changed
 
 - name: Remove YUM repositories
   file:
