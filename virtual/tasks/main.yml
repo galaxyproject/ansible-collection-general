@@ -42,4 +42,16 @@
         selection: hold
       when: ansible_os_family == "Debian"
 
+    # A dirty hack for https://bugs.python.org/issue36610
+    # This could fail on Debians that don't use 3.8, but we aren't running any of those right now, so this is good
+    # enough for the moment
+    - name: Disable sendfile in Python shutil
+      lineinfile:
+        dest: "/usr/lib/python3.8/shutil.py"
+        line: "_USE_CP_SENDFILE = False  # use of sendfile disabled by 'virtual' Ansible role"
+        regexp: "^_USE_CP_SENDFILE ="
+        state: present
+        backup: false
+      when: ansible_os_family == "Debian"
+
   when: ansible_system == "Linux" and ansible_virtualization_type == "zone"
