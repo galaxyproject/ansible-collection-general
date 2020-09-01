@@ -1,0 +1,49 @@
+---
+
+- name: Locale tasks
+  block:
+
+    - name: Install debconf packages
+      apt:
+        name:
+          - debconf
+          - debconf-utils
+
+    - name: Set debconf options for default locale
+      debconf:
+        name: locales
+        question: "{{ item.question }}"
+        value: "{{ item.value }}"
+        vtype: "{{ item.vtype }}"
+      loop:
+        - question: "locales/locales_to_be_generated"
+          value: "{{ default_locale }} {{ default_locale.split('.')[-1] }}"
+          vtype: "multiselect"
+        - question: "locales/default_environment_locale"
+          value: "{{ default_locale }}"
+          vtype: "select"
+      notify:
+        - reconfigure locales
+
+    - name: Install locales package
+      apt:
+        name: locales
+
+    - name: Ensure default locale is generated
+      locale_gen:
+        name: "{{ default_locale }}"
+      notify:
+        - reconfigure locales
+
+    - name: Ensure default locale is set
+      lineinfile:
+        dest: "/etc/default/locale"
+        regexp: "^LANG="
+        line: "LANG={{ default_locale }}"
+      notify:
+        - reconfigure locales
+
+    - name: Flush handlers
+      meta: flush_handlers
+
+  when: ansible_os_family == "Debian" and default_locale is defined

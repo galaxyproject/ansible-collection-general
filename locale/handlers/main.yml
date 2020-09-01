@@ -1,0 +1,6 @@
+---
+
+- name: reconfigure locales
+  command: dpkg-reconfigure -f noninteractive locales
+  environment:
+    DEBIAN_FRONTEND: noninteractive
