@@ -54,4 +54,10 @@
         backup: false
       when: ansible_os_family == "Debian"
 
+    # resolv.conf is not maintained in newer maually-updated LX Brand Ubuntu zones
+    - name: Include resolv role for Ubuntu LX Brand zones
+      include_role:
+        name: resolv
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('18.04', '>=')
+
   when: ansible_system == "Linux" and ansible_virtualization_type == "zone"

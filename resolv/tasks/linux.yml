@@ -1,12 +1,5 @@
 ---
 
-- name: Uninstall resolvconf
-  apt:
-    name: resolvconf
-    state: absent
-    purge: yes
-  when: ansible_lsb is defined and 'id' in ansible_lsb and ansible_lsb.id == "Ubuntu"
-
 - name: Check for dhclient
   command: pgrep dhclient
   register: dhclient
@@ -20,3 +13,12 @@
     mode: 0444
     backup: yes
   when: dhclient.rc == 1
+
+# Ideally we do this first, but it can fail if DNS is broken since the module automatically installs python3-apt:
+# [WARNING]: Updating cache and auto-installing missing dependency: python3-apt
+- name: Uninstall resolvconf
+  apt:
+    name: resolvconf
+    state: absent
+    purge: yes
+  when: ansible_lsb is defined and 'id' in ansible_lsb and ansible_lsb.id == "Ubuntu"
