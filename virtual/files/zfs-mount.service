@@ -1,0 +1,14 @@
+[Unit]
+Description=Mount Native ZFS filesystems
+Documentation=man:zfs(8)
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=local-fs.target
+Before=sysinit.target shutdown.target
+
+[Service]
+Type=oneshot
+ExecStart=/native/usr/sbin/zfs mount -a
+
+[Install]
+WantedBy=basic.target

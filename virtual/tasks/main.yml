@@ -5,59 +5,10 @@
     name: "{{ inventory_hostname }}"
     use: "{{ hostname_strategy |default(omit) }}"
 
-- name: Amazon EC2 tasks
-  block:
-
-    - name: Install nvme-cli on EC2 instances
-      include_role:
-        name: packages
-      vars:
-        override_packages:
-          - nvme-cli
-
-    - name: Install EC2 udev script
-      copy:
-        src: ebs-nvme-mapping.sh
-        dest: /sbin/ebs-nvme-mapping.sh
-        mode: "0755"
-      notify:
-        - trigger udevd
-
-    - name: Install EC2 udev rule
-      copy:
-        content: |
-          SUBSYSTEM=="block", KERNEL=="nvme[0-9]*n[0-9]*", ATTRS{model}=="Amazon Elastic Block Store", PROGRAM+="/sbin/ebs-nvme-mapping.sh /dev/%k" SYMLINK+="%c"
-        dest: /etc/udev/rules.d/999-aws-ebs-nvme.rules
-      notify:
-        - trigger udevd
-
+- name: Include Amazon EC2 tasks
+  include_tasks: amazon-ec2.yml
   when: ansible_system_vendor == "Amazon EC2"
 
-- name: SmartOS LX Brand tasks
-  block:
-
-    - name: Hold back systemd
-      dpkg_selections:
-        name: systemd
-        selection: hold
-      when: ansible_os_family == "Debian"
-
-    # A dirty hack for https://bugs.python.org/issue36610
-    # This could fail on Debians that don't use 3.8, but we aren't running any of those right now, so this is good
-    # enough for the moment
-    - name: Disable sendfile in Python shutil
-      lineinfile:
-        dest: "/usr/lib/python3.8/shutil.py"
-        line: "_USE_CP_SENDFILE = False  # use of sendfile disabled by 'virtual' Ansible role"
-        regexp: "^_USE_CP_SENDFILE ="
-        state: present
-        backup: false
-      when: ansible_os_family == "Debian"
-
-    # resolv.conf is not maintained in newer maually-updated LX Brand Ubuntu zones
-    - name: Include resolv role for Ubuntu LX Brand zones
-      include_role:
-        name: resolv
-      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('18.04', '>=')
-
+- name: Include SmartOS LX Brand tasks
+  include_tasks: lx-brand.yml
   when: ansible_system == "Linux" and ansible_virtualization_type == "zone"

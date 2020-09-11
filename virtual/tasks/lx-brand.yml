@@ -1,0 +1,39 @@
+---
+
+- name: SmartOS LX Brand Debian tasks
+  block:
+
+    - name: Hold back systemd
+      dpkg_selections:
+        name: systemd
+        selection: hold
+
+    # A dirty hack for https://bugs.python.org/issue36610
+    # This could fail on Debians that don't use 3.8, but we aren't running any of those right now, so this is good
+    # enough for the moment
+    - name: Disable sendfile in Python shutil
+      lineinfile:
+        dest: "/usr/lib/python3.8/shutil.py"
+        line: "_USE_CP_SENDFILE = False  # use of sendfile disabled by 'virtual' Ansible role"
+        regexp: "^_USE_CP_SENDFILE ="
+        state: present
+        backup: false
+
+    # resolv.conf is not maintained in newer maually-updated LX Brand Ubuntu zones
+    - name: Include resolv role for Ubuntu LX Brand zones
+      include_role:
+        name: resolv
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('18.04', '>=')
+
+    - name: Create native ZFS mount-all service
+      copy:
+        src: zfs-mount.service
+        dest: /etc/systemd/system/zfs-mount.service
+        mode: "0644"
+
+    - name: Enable native ZFS mount-all service
+      systemd:
+        name: zfs-mount.service
+        enabled: true
+
+  when: ansible_os_family == "Debian"
