@@ -8,16 +8,7 @@
         name: systemd
         selection: hold
 
-    # A dirty hack for https://bugs.python.org/issue36610
-    # This could fail on Debians that don't use 3.8, but we aren't running any of those right now, so this is good
-    # enough for the moment
-    - name: Disable sendfile in Python shutil
-      lineinfile:
-        dest: "/usr/lib/python3.8/shutil.py"
-        line: "_USE_CP_SENDFILE = False  # use of sendfile disabled by 'virtual' Ansible role"
-        regexp: "^_USE_CP_SENDFILE ="
-        state: present
-        backup: false
+    # sendfile bug fixed in https://github.com/joyent/illumos-joyent/commit/b189ef943db9b29af9068d3b3b49bc364699da56 20200910T013122Z
 
     # resolv.conf is not maintained in newer maually-updated LX Brand Ubuntu zones
     - name: Include resolv role for Ubuntu LX Brand zones
