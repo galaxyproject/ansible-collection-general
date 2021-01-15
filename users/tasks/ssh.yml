@@ -50,3 +50,11 @@
   with_subelements:
     - "{{ common_private_key_users }}"
     - keys
+
+- name: Install known hosts
+  known_hosts:
+    name: "{{ item.name }}"
+    key: "{{ item.key }}"
+    path: "{{ item.path }}"
+    state: "{{ item.state | default(omit) }}"
+  with_inheritance_chain: "known_hosts"
