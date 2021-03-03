@@ -3,7 +3,7 @@
 - name: Schedule cron jobs
   cron:
     name: "{{ item.name | default(item.id) }}"
-    cron_file: "{{ 'ansible_cron_' ~ item.id if ansible_os_family != 'Solaris' else 'crontabs/' ~ item.user }}"
+    cron_file: "{{ (item.use_cron_file | default(true)) | ternary('ansible_cron_' ~ item.id if ansible_os_family != 'Solaris' else 'crontabs/' ~ item.user, omit) }}"
     user: "{{ item.user }}"
     hour: "{{ item.hour | default(omit) }}"
     minute: "{{ item.minute | default(omit) }}"
