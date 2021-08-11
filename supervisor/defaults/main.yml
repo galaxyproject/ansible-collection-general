@@ -4,5 +4,8 @@ supervisord_install: virtualenv
 supervisord_prefix: /opt/supervisor
 supervisord_conf_path: /etc/supervisord.conf
 supervisord_conf_dir: /etc/opt/supervisor
-supervisord_sock_path: /var/run/supervisor.sock
 supervisord_log_dir: /var/log/supervisord
+supervisord_run_dir: /var/run
+supervisord_sock_path: "{{ supervisord_run_dir }}/supervisor.sock"
+supervisord_conf_ext: conf
+supervisord_service_install: true

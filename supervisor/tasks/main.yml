@@ -24,3 +24,4 @@
     name: "{{ supervisord_service_name }}"
     enabled: yes
     state: started
+  when: supervisord_service_name is defined

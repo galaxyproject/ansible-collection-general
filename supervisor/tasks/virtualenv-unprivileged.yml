@@ -1,0 +1,31 @@
+---
+
+- name: Install supervisor (virtualenv)
+  pip:
+    name: supervisor
+    virtualenv: "{{ supervisord_prefix }}"
+    virtualenv_command: "{{ pip_virtualenv_command | default(omit) }}"
+
+- name: Create local supervisor directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0750
+  with_items:
+    - "{{ supervisord_conf_dir }}"
+    - "{{ supervisord_log_dir }}"
+    - "{{ supervisord_run_dir }}"
+
+- name: Create cron job to start supervisord
+  cron:
+    name: galaxyproject.supervisord-run
+    minute: "*/5"
+    job: "{ date; pgrep -u {{ ansible_user }} supervisord || '{{ supervisord_prefix }}/bin/supervisord' -c '{{ supervisord_conf_path }}'; } >> {{ supervisord_log_dir }}/supervisord-launch.log 2>&1"
+    state: "{{ supervisord_service_install | ternary('present', 'absent') }}"
+
+- name: Install supervisord.conf
+  template:
+    src: supervisord.conf.j2
+    dest: "{{ supervisord_conf_path }}"
+  notify:
+    - restart supervisord
