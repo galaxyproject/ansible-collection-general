@@ -9,3 +9,6 @@ supervisord_run_dir: /var/run
 supervisord_sock_path: "{{ supervisord_run_dir }}/supervisor.sock"
 supervisord_conf_ext: conf
 supervisord_service_install: true
+
+# this is run by cron
+supervisord_unprivileged_command: "{ date; pgrep -u {{ ansible_user }} supervisord || '{{ supervisord_prefix }}/bin/supervisord' -c '{{ supervisord_conf_path }}'; } >> {{ supervisord_log_dir }}/supervisord-launch.log 2>&1"
