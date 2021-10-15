@@ -99,6 +99,14 @@
     permissions: "{{ item.permissions | default(omit) }}"
   with_items: "{{ zfs_admin_permissions | default([]) }}"
 
+# TODO: this could go after directories to make sure parents are created, but then you can't use directories to set
+# ownership/permissions on the subvolume
+- name: Create btrfs subvolumes
+  command: "btrfs subvolume create {{ item.path }}"
+  args:
+    creates: "{{ item.path }}"
+  with_inheritance_chain: "btrfs_subvolumes"
+
 - name: Create directories
   file:
     path: "{{ item.path }}"
