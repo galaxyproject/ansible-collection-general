@@ -1,11 +1,12 @@
 ---
 
-- name: Add/remove groups
+- name: Add/remove groups (non-Solaris)
   group:
     name: "{{ item.name }}"
     gid: "{{ item.gid | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
+    local: "{{ item.local | default(omit) }}"
   with_inheritance_chain: "groups"
 
 - name: Add/remove users (non-Solaris)
@@ -19,4 +20,5 @@
     shell: "{{ item.shell | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
+    local: "{{ item.local | default(omit) }}"
   with_inheritance_chain: "users"
