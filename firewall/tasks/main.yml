@@ -1,5 +1,11 @@
 ---
 
+- name: Install or uninstall firewalld
+  yum:
+    name: firewalld
+    state: "{{ firewalld_state }}"
+  when: firewalld_state is defined
+
 - name: Manage firewall rules
   firewalld:
     immediate: "{{ item.immediate | default(omit) }}"
@@ -18,3 +24,8 @@
     - "{{ group_firewall_rules }}"
     - "{{ host_firewall_rules }}"
   when: ansible_os_family == "RedHat"
+
+- name: Set SELinux state
+  selinux:
+    state: "{{ selinux_state }}"
+  when: "selinux_state is defined"
