@@ -127,7 +127,35 @@
 - name: Install centos-release-scl
   yum:
     name: centos-release-scl
-  when: ansible_os_family == "RedHat" and install_scl is defined and install_scl
+  when:
+    - install_scl
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version < "8"
+
+- name: EPEL Block
+  block:
+
+    - name: Install EPEL GPG Key
+      ansible.builtin.rpm_key:
+        key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+
+    - name: Install epel-release package
+      ansible.builtin.package:
+        name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+
+    - name: Enable PowerTools repo
+      community.general.ini_file:
+        path: "/etc/yum.repos.d/{{ powertools_repo_file[ansible_distribution] }}"
+        section: powertools
+        option: enabled
+        value: "1"
+        mode: "0644"
+      when:
+        - ansible_distribution_major_version >= "8"
+
+  when:
+    - install_epel
+    - ansible_os_family == "RedHat"
 
 - name: Install packages
   package:

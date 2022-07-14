@@ -12,3 +12,10 @@ host_apt_keys: []
 all_yum_repositories: []
 group_yum_repositories: []
 host_yum_repositories: []
+
+install_scl: false
+install_epel: false
+powertools_repo_file:
+  EL: CentOS-Linux-PowerTools.repo
+  CentOS: CentOS-Linux-PowerTools.repo
+  Rocky: Rocky-PowerTools.repo
