@@ -121,8 +121,18 @@
 
 - name: Update APT cache for repository addition
   apt:
-    update_cache: yes
-  when: ansible_os_family == "Debian" and apt_repository.changed
+    update_cache: true
+  when:
+    - ansible_os_family == "Debian"
+    - apt_repository is changed
+
+- name: Update APT cache if out of date
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ packages_cache_valid_time | default(3600) }}"
+  when:
+    - ansible_os_family == "Debian"
+    - (packages_apt_auto_update_cache | default(true)) is true
 
 - name: Install centos-release-scl
   yum:

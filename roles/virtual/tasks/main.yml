@@ -1,14 +1,21 @@
 ---
 
-- name: Set hostname
-  hostname:
-    name: "{{ inventory_hostname }}"
-    use: "{{ hostname_strategy |default(omit) }}"
-
-- name: Include Amazon EC2 tasks
-  include_tasks: amazon-ec2.yml
+- name: Collect EC2 facts
+  amazon.aws.ec2_metadata_facts:
   when: ansible_system_vendor == "Amazon EC2"
 
+- name: Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+    use: "{{ hostname_strategy | default(omit) }}"
+
+# TODO: I think these tasks aren't necessary anymore, drop if true
+#- name: Include Amazon EC2 tasks
+#  include_tasks: amazon-ec2.yml
+#  when: ansible_system_vendor == "Amazon EC2"
+
 - name: Include SmartOS LX Brand tasks
-  include_tasks: lx-brand.yml
-  when: ansible_system == "Linux" and ansible_virtualization_type == "zone"
+  ansible.builtin.include_tasks: lx-brand.yml
+  when:
+    - ansible_system == "Linux"
+    - ansible_virtualization_type == "zone"
