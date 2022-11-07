@@ -7,7 +7,7 @@
   template:
     src: "templates/supervisor/{{ item }}.j2"
     dest: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
-  with_inheritance_chain: "supervisor_configs"
+  with_galaxyproject.general.inheritance_chain: "supervisor_configs"
   notify:
     - update supervisord
 
@@ -15,7 +15,7 @@
   file:
     path: "{{ supervisord_conf_dir }}/{{ item }}.{{ supervisord_conf_ext }}"
     state: absent
-  with_inheritance_chain: "absent_supervisor_configs"
+  with_galaxyproject.general.inheritance_chain: "absent_supervisor_configs"
   notify:
     - update supervisord
 

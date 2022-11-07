@@ -12,5 +12,5 @@
     weekday: "{{ item.weekday | default(omit) }}"
     job: "{{ item.job }}"
     state: "{{ item.state | default(omit) }}"
-  with_inheritance_chain: "crontabs"
+  with_galaxyproject.general.inheritance_chain: "crontabs"
   notify: refresh cron

@@ -15,6 +15,6 @@
     regexp: "^{{ item.option }} "
     state: present
     backup: yes
-  with_inheritance_chain: sshd_config
+  with_galaxyproject.general.inheritance_chain: sshd_config
   notify:
     - reload sshd

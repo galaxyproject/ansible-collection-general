@@ -57,4 +57,4 @@
     key: "{{ item.key }}"
     path: "{{ item.path }}"
     state: "{{ item.state | default(omit) }}"
-  with_inheritance_chain: "known_hosts"
+  with_galaxyproject.general.inheritance_chain: "known_hosts"

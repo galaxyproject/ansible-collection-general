@@ -105,7 +105,7 @@
   command: "btrfs subvolume create {{ item.path }}"
   args:
     creates: "{{ item.path }}"
-  with_inheritance_chain: "btrfs_subvolumes"
+  with_galaxyproject.general.inheritance_chain: "btrfs_subvolumes"
 
 - name: Create directories
   file:
@@ -115,7 +115,7 @@
     recurse: "{{ item.recurse | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
     state: "directory"
-  with_inheritance_chain: "directories"
+  with_galaxyproject.general.inheritance_chain: "directories"
 
 - name: Create links
   file:
@@ -126,4 +126,4 @@
     mode: "{{ item.mode | default(omit) }}"
     force: "{{ item.force | default(omit) }}"
     state: "link"
-  with_inheritance_chain: "links"
+  with_galaxyproject.general.inheritance_chain: "links"

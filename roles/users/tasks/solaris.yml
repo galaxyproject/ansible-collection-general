@@ -6,7 +6,7 @@
     gid: "{{ item.gid | default(omit) }}"
     system: "{{ item.system | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  with_inheritance_chain: "users"
+  with_galaxyproject.general.inheritance_chain: "users"
   when: item.group is defined
 
 - name: Add/remove users (Solaris)
@@ -21,4 +21,4 @@
     password: "{{ item.password | default('NP') }}"
     update_password: "{{ item.update_password | default(omit) }}"
     state: "{{ item.state | default(omit) }}"
-  with_inheritance_chain: "users"
+  with_galaxyproject.general.inheritance_chain: "users"

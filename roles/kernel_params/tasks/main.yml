@@ -8,4 +8,4 @@
     reload: "{{ item.reload | default(omit) }}"
     sysctl_file: /etc/sysctl.d/98-ansible.conf
     sysctl_set: "{{ item.sysctl_set | default(omit) }}"
-  with_inheritance_chain: "kernel_params"
+  with_galaxyproject.general.inheritance_chain: "kernel_params"
