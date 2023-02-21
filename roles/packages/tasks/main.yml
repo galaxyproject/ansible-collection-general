@@ -169,4 +169,4 @@
 
 - name: Install packages
   package:
-    name: "{{ lookup('inheritance_chain', 'packages') }}"
+    name: "{{ lookup('galaxyproject.general.inheritance_chain', 'packages') }}"

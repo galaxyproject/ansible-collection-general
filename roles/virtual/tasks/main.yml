@@ -1,6 +1,6 @@
 ---
 
-- name: Collect EC2 facts
+- name: Gather EC2 facts
   amazon.aws.ec2_metadata_facts:
   when: ansible_system_vendor == "Amazon EC2"
 
