@@ -16,7 +16,7 @@
 - name: Set authorized keys
   authorized_key:
     user: "{{ item.name }}"
-    key: "{% for authorized in item.authorized %}{{ sshkeys[authorized] ~ '\n' }}{% endfor %}"
+    key: "{% for authorized in item.authorized %}{{ ssh_public_keys[authorized] ~ '\n' }}{% endfor %}"
     exclusive: "{{ item.exclusive | default('yes') }}"
   with_items: "{{ common_authorized_key_users }}"
 
@@ -42,7 +42,7 @@
 
 - name: Install private keys
   copy:
-    content: "{{ sshprivatekeys[item.1.key] }}"
+    content: "{{ ssh_private_keys[item.1.key] }}"
     dest: "~{{ item.0.name }}/.ssh/{{ item.1.file }}"
     owner: "{{ item.0.name }}"
     group: "{{ private_key_user_groups[item.0.name] }}"
