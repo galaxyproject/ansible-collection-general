@@ -1,12 +1,31 @@
 ---
 
+- name: SmartOS LX Brand hostname tasks
+  block:
+
+    # Annoyingly, the builtin hostname module supports this via FileStrategy, but doesn't expose its functionalty
+    # through the very limited set of `use` params you can choose from
+
+    - name: Set hostname (immediate)
+      command: "hostname {{ inventory_hostname }}"
+      changed_when: false
+
+    - name: Set hostname (persistent)
+      copy:
+        content: "{{ inventory_hostname }}"
+        dest: /etc/hostname
+        mode: "0755"
+
+  when: (hostname_strategy | default(null)) == "file"
+
 - name: SmartOS LX Brand Debian tasks
   block:
 
-    - name: Hold back systemd
-      dpkg_selections:
-        name: systemd
-        selection: hold
+    # I don't believe this is still necessary
+    #- name: Hold back systemd
+    #  dpkg_selections:
+    #    name: systemd
+    #    selection: hold
 
     # sendfile bug fixed in https://github.com/joyent/illumos-joyent/commit/b189ef943db9b29af9068d3b3b49bc364699da56 20200910T013122Z
 
@@ -28,3 +47,18 @@
         enabled: true
 
   when: ansible_os_family == "Debian"
+
+- name: SmartOS LX Brand Enterprise Linux tasks
+  block:
+
+    - name: Disable services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        state: stopped
+        enabled: false
+      loop:
+        - dbus-broker.service
+        - rsyslog.service
+
+
+  when: ansible_os_family == "RedHat"

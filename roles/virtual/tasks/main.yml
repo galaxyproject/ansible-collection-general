@@ -8,6 +8,7 @@
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
     use: "{{ hostname_strategy | default(omit) }}"
+  when: hostname_strategy is not defined or (hostname_strategy is defined and hostname_strategy != "file")
 
 # TODO: I think these tasks aren't necessary anymore, drop if true
 #- name: Include Amazon EC2 tasks
@@ -18,4 +19,4 @@
   ansible.builtin.include_tasks: lx-brand.yml
   when:
     - ansible_system == "Linux"
-    - ansible_virtualization_type == "zone"
+    - ansible_virtualization_type == "zone" or ansible_kernel_version == "BrandZ virtual linux"
