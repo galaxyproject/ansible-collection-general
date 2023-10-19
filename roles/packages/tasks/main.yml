@@ -142,7 +142,7 @@
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version < "8"
 
-- name: EPEL Block
+- name: EPEL Block (EL7)
   block:
 
     - name: Install EPEL GPG Key
@@ -153,7 +153,15 @@
       ansible.builtin.package:
         name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
 
-    - name: Enable PowerTools repo
+  when:
+    - install_epel
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version < "8"
+
+- name: EPEL Block (EL8+)
+  block:
+
+    - name: Enable PowerTools repo (EL8)
       community.general.ini_file:
         path: "/etc/yum.repos.d/{{ powertools_repo_file[ansible_distribution] }}"
         section: powertools
@@ -161,11 +169,26 @@
         value: "1"
         mode: "0644"
       when:
-        - ansible_distribution_major_version >= "8"
+        - ansible_distribution_major_version == "8"
+
+    - name: Enable CRB repo (EL9)
+      community.general.ini_file:
+        path: "/etc/yum.repos.d/{{ crb_repo_file[ansible_distribution] }}"
+        section: crb
+        option: enabled
+        value: "1"
+        mode: "0644"
+      when:
+        - ansible_distribution_major_version == "9"
+
+    - name: Install epel-release
+      ansible.builtin.dnf:
+        name: epel-release
 
   when:
     - install_epel
     - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version >= "8"
 
 - name: Install packages
   package:
