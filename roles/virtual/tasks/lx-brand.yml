@@ -16,7 +16,7 @@
         dest: /etc/hostname
         mode: "0755"
 
-  when: (hostname_strategy | default(null)) == "file"
+  when: (hostname_strategy | default(none)) == "file"
 
 - name: SmartOS LX Brand Debian tasks
   block:
@@ -29,7 +29,7 @@
 
     # sendfile bug fixed in https://github.com/joyent/illumos-joyent/commit/b189ef943db9b29af9068d3b3b49bc364699da56 20200910T013122Z
 
-    # resolv.conf is not maintained in newer maually-updated LX Brand Ubuntu zones
+    # resolv.conf is not maintained in newer manually-updated LX Brand Ubuntu zones
     - name: Include resolv role for Ubuntu LX Brand zones
       include_role:
         name: resolv
@@ -56,9 +56,6 @@
         name: "{{ item }}"
         state: stopped
         enabled: false
-      loop:
-        - dbus-broker.service
-        - rsyslog.service
-
+      loop: "{{ virtual_lx_disable_services_redhat[ansible_distribution_major_version] }}"
 
   when: ansible_os_family == "RedHat"

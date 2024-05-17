@@ -1,0 +1,8 @@
+---
+
+virtual_lx_disable_services_redhat:
+  "8":
+    - rsyslog.service
+  "9":
+    - dbus-broker.service
+    - rsyslog.service
