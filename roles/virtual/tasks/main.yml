@@ -2,7 +2,7 @@
 
 - name: Gather EC2 facts
   amazon.aws.ec2_metadata_facts:
-  when: ansible_system_vendor == "Amazon EC2"
+  when: (ansible_system_vendor | default(none)) == "Amazon EC2"
 
 - name: Set hostname
   ansible.builtin.hostname:
