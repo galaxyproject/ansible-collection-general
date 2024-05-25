@@ -18,6 +18,7 @@
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
   with_galaxyproject.general.inheritance_chain: "files"
+  register: __files_result
   when: "item.state is not defined or item.state == 'present'"
 
 - name: Remove copy files with state=absent
@@ -38,6 +39,7 @@
     owner: "{{ item.owner | default(omit) }}"
     src: "{{ item.src | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
+  register: __templates_result
   with_galaxyproject.general.inheritance_chain: "templates"
 
 - name: Remove template files with state=absent
@@ -45,6 +47,7 @@
     path: "{{ item.dest }}"
     state: absent
   with_galaxyproject.general.inheritance_chain: "templates"
+  register: __templates_absent_result
   when: "item.state is defined and item.state == 'absent'"
 
 - name: Set lines in files
@@ -66,4 +69,10 @@
     unsafe_writes: "{{ item.unsafe_writes | default(omit) }}"
     validate: "{{ item.validate | default(omit) }}"
   with_galaxyproject.general.inheritance_chain: "lines"
+  register: __lines_result
   notify: "{{ item.notify | default([]) }}"
+
+- name: Reload systemd if any changes were to systemd units
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: ((__files_result.results + __templates_result.results + __templates_absent_result.results + __lines_result.results) | selectattr("changed")) is any and ((__files_result.results + __templates_result.results + __templates_absent_result.results + __lines_result.results) | selectattr("item.dest", "match", "/etc/systemd/system/.*")) is any
