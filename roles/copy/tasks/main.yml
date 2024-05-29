@@ -75,4 +75,4 @@
 - name: Reload systemd if any changes were to systemd units
   ansible.builtin.systemd:
     daemon_reload: true
-  when: ((__files_result.results + __templates_result.results + __templates_absent_result.results + __lines_result.results) | selectattr("changed")) is any and ((__files_result.results + __templates_result.results + __templates_absent_result.results + __lines_result.results) | selectattr("item.dest", "match", "/etc/systemd/system/.*")) is any
+  when: ((__files_result.results + __templates_result.results + __templates_absent_result.results) | selectattr("changed")) is any and ((__files_result.results + __templates_result.results + __templates_absent_result.results) | selectattr("item.dest", "match", "/etc/systemd/system/.*")) is any
