@@ -43,16 +43,16 @@ tags: []
 dependencies: {}
 
 # The URL of the originating SCM repository
-repository: http://example.com/repository
+repository: https://github.com/galaxyproject/ansible-collection-general/
 
 # The URL to any online docs
-documentation: http://docs.example.com
+documentation: https://github.com/galaxyproject/ansible-collection-general/
 
 # The URL to the homepage of the collection/project
-homepage: http://example.com
+homepage: https://galaxyproject.org
 
 # The URL to the collection issue tracker
-issues: http://example.com/issue/tracker
+issues: https://github.com/galaxyproject/ansible-collection-general/issues
 
 # A list of file glob-like patterns used to filter any files or directories that should not be included in the build
 # artifact. A pattern is matched from the relative path of the file or directory of the collection directory. This
