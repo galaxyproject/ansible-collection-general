@@ -1,0 +1,91 @@
+---
+
+- name: Install CephX Keys (kernel driver)
+  ansible.builtin.copy:
+    content: "{{ item.key }}"
+    dest: "/etc/ceph/{{ item.name }}.secret"
+    mode: 0400
+  when: "(item.fstype | default('ceph')) == 'ceph'"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Install CephX Keys (FUSE driver)
+  ansible.builtin.copy:
+    content: |
+      [client.{{ item.name }}]
+      key = {{ item.key }}
+    dest: "/etc/ceph/ceph.client.{{ item.name }}.keyring"
+    mode: 0400
+  when: "(item.fstype | default('ceph')) == 'fuse.ceph'"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# WARNING: this only supports a single value for mon host, it wasn't apparent from the docs how to configure multiple
+# sets for multiple client instances/mounts, and is unnecessary for my purposes.
+#
+# client_dirsize_rbytes option due to meryl error "tar: read-db.meryl: file changed as we read it", references:
+#   https://ceph-users.ceph.narkive.com/th0JxsKR/cephfs-tar-archiving-immediately-after-writing
+#   https://www.spinics.net/lists/ceph-users/msg25010.html
+- name: Install ceph.conf (FUSE driver)
+  ansible.builtin.copy:
+    content: |
+      [global]
+      admin socket = /var/run/ceph/$cluster-$name-$pid.asok
+      client reconnect stale = true
+      client_dirsize_rbytes = false
+      debug client = 0/2
+      fuse big writes = true
+      mon host = {{ ceph_mounts[0].src.rsplit(':', 1)[0] }}
+    dest: /etc/ceph/ceph.conf
+    mode: 0444
+
+- name: Create Ceph Mountpoints
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    mode: 0755
+    owner: "root"
+    group: "root"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Mount Ceph Filesystems (kernel driver)
+  ansible.builtin.mount:
+    name: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: ceph
+    passno: 2
+    opts: "name={{ item.name }},secretfile=/etc/ceph/{{ item.name }}.secret{{ ',' ~ item.opts if item.opts else '' }}"
+    state: "{{ ceph_mount_state }}"
+  when: "(item.fstype | default('ceph')) == 'ceph'"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }} -> {{ item.path }}"
+
+- name: Mount Ceph Filesystems (FUSE driver)
+  ansible.builtin.mount:
+    name: "{{ item.path }}"
+    src: "none"
+    fstype: fuse.ceph
+    passno: 2
+    opts: "ceph.id={{ item.name }},ceph.conf=/etc/ceph/ceph.conf,ceph.client_mountpoint={{ item.src.rsplit(':', 1)[1] }},x-systemd.device-timeout=30,x-systemd.mount-timeout=30{{ ',' ~ item.opts if item.opts else '' }}"
+    state: "{{ ceph_mount_state }}"
+  when: "(item.fstype | default('ceph')) == 'fuse.ceph'"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }} -> {{ item.path }}"
+
+- name: Set Filesystem Permissions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: "directory"
+    mode: "{{ item.mode | default('0755') }}"
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+  when: "ceph_mount_state == 'mounted'"
+  loop: "{{ ceph_mounts }}"
+  loop_control:
+    label: "{{ item.name }}"
