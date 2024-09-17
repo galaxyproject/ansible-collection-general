@@ -6,7 +6,8 @@
 - name: Secrets block
   block:
 
-    - import_tasks: secrets.yml
+    - include_tasks: secrets.yml
+      when: openstack_manage_secrets
 
     - include_tasks: initialize.yml
       when:
@@ -23,7 +24,8 @@
 
   always:
 
-    - import_tasks: clean.yml
+    - include_tasks: clean.yml
+      when: openstack_manage_secrets
 
   rescue:
 
