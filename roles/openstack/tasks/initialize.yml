@@ -1,0 +1,44 @@
+---
+
+- name: Create network
+  openstack.cloud.network:
+    cloud: "{{ os_cloud_id }}"
+    name: "{{ os_network.name }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create subnet
+  openstack.cloud.subnet:
+    network_name: "{{ os_network.name }}"
+    name: "{{ os_network.subnet.name }}"
+    cidr: "{{ os_network.subnet.cidr }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create router
+  openstack.cloud.router:
+    name: "{{ os_network.router.name }}"
+    network: "{{ os_network.router.network }}"
+    interfaces: "{{ os_network.router.interfaces }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create security groups
+  openstack.cloud.security_group:
+    cloud: "{{ os_cloud_id }}"
+    name: "{{ item.name }}"
+  loop: "{{ os_security_group_rules }}"
+  delegate_to: localhost
+  run_once: true
+
+- name: Create security group rules
+  openstack.cloud.security_group_rule:
+    cloud: "{{ os_cloud_id }}"
+    security_group: "{{ item.0.name }}"
+    protocol: "{{ item.1.protocol | default(omit) }}"
+    remote_ip_prefix: "{{ item.1.remote_ip_prefix | default(omit) }}"
+    port_range_min: "{{ item.1.port_range_min | default(omit) }}"
+    port_range_max: "{{ item.1.port_range_max | default(omit) }}"
+  loop: "{{ os_security_group_rules | subelements('rules') }}"
+  delegate_to: localhost
+  run_once: true
