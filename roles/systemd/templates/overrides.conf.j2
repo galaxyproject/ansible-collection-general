@@ -1,0 +1,7 @@
+;;
+;; This file is managed by Ansible.  ALL CHANGES WILL BE OVERWRITTEN.
+;;
+[{{ item.unit_type | default("service") | title }}]
+{% for key in item.override %}
+{{ key }}={{ item.override[key] }}
+{% endfor %}

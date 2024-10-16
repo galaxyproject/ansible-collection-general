@@ -1,0 +1,58 @@
+---
+
+- name: "Create unit directory for services"
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item.name }}.{{ item.unit_type | default('service') | lower }}.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_galaxyproject.general.inheritance_chain:
+    - "systemd_resource_controls"
+    - "systemd_overrides"
+
+- name: "Slurp supported filesystems"
+  ansible.builtin.slurp: 
+    src: /proc/filesystems
+  register: __systemd_filesystems
+
+- name: "Set cgroup version fact"
+  ansible.builtin.set_fact:
+    __systemd_cgroup_version: "{{ (__systemd_filesystems['content'] | b64decode | regex_findall('^nodev\\s+cgroup2$', multiline=True) is truthy) | ternary('v2', 'v1') }}"
+
+- name: "Create unit files for resource controlled units"
+  ansible.builtin.template:
+    src: resource_controls.conf.j2
+    dest: "/etc/systemd/system/{{ item.name }}.{{ item.unit_type | default('service') | lower }}.d/ansible_resource_controls.conf"
+    owner: root
+    group: root
+    mode: "0444"
+  with_galaxyproject.general.inheritance_chain: "systemd_resource_controls"
+  register: __systemd_resource_controls_result
+  notify:
+    - reload systemd
+    - restart changed systemd services
+
+- name: "Create unit files for override units"
+  ansible.builtin.template:
+    src: overrides.conf.j2
+    dest: "/etc/systemd/system/{{ item.name }}.{{ item.unit_type | default('service') | lower }}.d/ansible_overrides.conf"
+    owner: root
+    group: root
+    mode: "0444"
+  with_galaxyproject.general.inheritance_chain: "systemd_overrides"
+  register: __systemd_overrides_result
+  notify:
+    - reload systemd
+    - restart changed systemd services
+
+- name: Create persistent journald directory
+  ansible.builtin.file:
+    path: /var/log/journal
+    state: directory
+    owner: root
+    group: systemd-journal
+    mode: "2755"
+  when: "{{ systemd_journald_persistent | default(false) }}"
+  notify:
+    - reload journald

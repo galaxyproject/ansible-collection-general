@@ -1,0 +1,19 @@
+---
+
+- name: reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: reload journald
+  ansible.builtin.systemd:
+    name: systemd-journald.service
+    state: restarted
+
+- name: restart changed systemd services
+  service:
+    name: "{{ item.item.name }}.service"
+    state: restarted
+  with_items: "{{ __systemd_resource_controls_result.results + __systemd_overrides_result.results }}"
+  when: "item.changed and (item.item.unit_type | default('service') | lower == 'service') and (item.item.restart_on_change | default(true))"
+  loop_control:
+    label: "{{ item.item.name }}.{{ item.item.unit_type | default('service') | lower }}"
