@@ -23,14 +23,7 @@ except ImportError:
 
 
 class LookupModule(LookupBase):
-    def run(self, terms, variables=None, **kwargs):
-        try:
-            assert 'group_names' in variables, "Missing 'group_names' in variables"
-            assert len(terms) == 1, f"Inheritance chain lookup plugin expects 1 term, got {len(terms)}"
-        except AssertionError as exc:
-            raise AnsibleError(str(exc))
-        _vars = variables or {}
-        base = terms[0]
+    def __chain_for_base(self, base, _vars):
         r = []
         if 'override_' + base in _vars:
             prefixes = ['override']
@@ -51,4 +44,16 @@ class LookupModule(LookupBase):
             if t != _val:
                 display.vvvv(f'{_var} -> {t}')
             r.extend(t)
+        return r
+
+    def run(self, terms, variables=None, **kwargs):
+        try:
+            assert 'group_names' in variables, "Missing 'group_names' in variables"
+            assert len(terms) >= 1, f"Inheritance chain lookup plugin expects 1 or more terms, got {len(terms)}"
+        except AssertionError as exc:
+            raise AnsibleError(str(exc))
+        _vars = variables or {}
+        r = []
+        for base in terms:
+            r.extend(self.__chain_for_base(base, _vars))
         return r
