@@ -16,7 +16,7 @@
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items: "{{ mounts | default([]) }}"
+  with_galaxyproject.general.inheritance_chain: "mounts"
 
 - name: Mount filesystems
   mount:
@@ -25,7 +25,7 @@
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts | default(omit) }}"
     state: "mounted"
-  with_items: "{{ mounts | default([]) }}"
+  with_galaxyproject.general.inheritance_chain: "mounts"
 
 - name: Set mountpoint permissions
   file:
@@ -34,7 +34,7 @@
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
     mode: "{{ item.mode | default(omit) }}"
-  with_items: "{{ mounts | default([]) }}"
+  with_galaxyproject.general.inheritance_chain: "mounts"
 
 - name: Create ZFS filesystems
   zfs:
