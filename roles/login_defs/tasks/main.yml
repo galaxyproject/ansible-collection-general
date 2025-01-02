@@ -1,0 +1,12 @@
+---
+
+- name: Modify /etc/login.defs
+  ansible.builtin.lineinfile:
+    dest: /etc/login.defs
+    regexp: '^#?\s*{{ item.key }}\s+.*'
+    line: "{{ item.key }} {{ item.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ login_defs | ansible.builtin.dict2items }}"
+  when: login_defs is defined and ansible_system == "Linux"
