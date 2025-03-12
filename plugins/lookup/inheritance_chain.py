@@ -77,4 +77,4 @@ class LookupModule(LookupBase):
                 r.extend(_r)
         if isinstance(r, dict):
             r = [r]
-        return r
+        return r or []
