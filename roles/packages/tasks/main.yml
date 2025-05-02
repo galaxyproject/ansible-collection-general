@@ -193,3 +193,4 @@
 - name: Install packages
   package:
     name: "{{ lookup('galaxyproject.general.inheritance_chain', 'packages') }}"
+  when: not (ansible_distribution == "SmartOS" and ansible_container is not defined)
