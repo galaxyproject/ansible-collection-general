@@ -24,6 +24,7 @@
     volume_size: "{{ os_volume_size | default(omit) }}"
     #volumes: "{{ os_volumes | default(omit) }}"
     #volumes: "{{ os_volumes }}"
+    timeout: "{{ openstack_spawn_timeout | default(omit) }}"
     userdata: |
       #cloud-config
       package_upgrade: false
@@ -87,7 +88,7 @@
 
 - name: Wait for instance to become accessible
   ansible.builtin.wait_for_connection:
-    timeout: 120
+    timeout: "{{ openstack_wait_timeout }}"
 
 - name: Set authorized keys
   ansible.builtin.authorized_key:

@@ -1,3 +1,9 @@
 ---
 
 openstack_manage_secrets: true
+
+# timeout value for spawn openstack.cloud.server task
+#openstack_spawn_timeout: omit
+
+# timeout value for spawn ansible.builtin.wait_for_connection task
+openstack_wait_timeout: 120
