@@ -1,14 +1,14 @@
 ---
 
 - name: Update cache and ensure apt-transport-https is installed
-  apt:
+  ansible.builtin.apt:
     pkg: apt-transport-https
     update_cache: yes
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
-- name: Add APT keys
-  apt_key:
+- name: Add APT keys (apt-key)
+  ansible.builtin.apt_key:
     data: "{{ item.data | default(omit) }}"
     file: "{{ item.file | default(omit) }}"
     id: "{{ item.id | default(omit) }}"
@@ -18,7 +18,36 @@
     url: "{{ item.url | default(omit) }}"
     validate_certs: "{{ item.validate_certs | default(omit) }}"
   with_galaxyproject.general.inheritance_chain: "apt_keys"
-  when: ansible_os_family == "Debian"
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution == "Debian"
+    - ansible_distribution_major_version < "12"
+
+- name: Add APT keys (URL)
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    checksum: "{{ item.checksum | default(omit) }}"
+    mode: "{{ item.mode | default('0644') }}"
+  with_galaxyproject.general.inheritance_chain: "apt_keys"
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution == "Debian"
+    - ansible_distribution_major_version >= "12"
+    - item.url is defined
+
+- name: Add APT keys (copy)
+  ansible.builtin.copy:
+    content: "{{ item.content | default(omit) }}"
+    src: "{{ item.src | default(omit) }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode | default('0644') }}"
+  with_galaxyproject.general.inheritance_chain: "apt_keys"
+  when:
+    - ansible_os_family == "Debian"
+    - ansible_distribution == "Debian"
+    - ansible_distribution_major_version >= "12"
+    - item.url is not defined
 
 - name: Add APT repositories
   apt_repository:
