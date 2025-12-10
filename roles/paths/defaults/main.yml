@@ -1,0 +1,21 @@
+---
+
+zfs_on_linux_release_version: "2.8"
+
+# options: kabi, dkms
+zfs_on_linux_kmod_style: kabi
+
+zfs_on_linux_package_name: zfs
+
+zfs_on_linux_repo_states: "{{ __zfs_on_linux_repo_states[zfs_on_linux_kmod_style] }}"
+__zfs_on_linux_repo_states:
+  kabi:
+    - name: zfs
+      state: disabled
+    - name: zfs-kmod
+      state: enabled
+  dkms:
+    - name: zfs
+      state: enabled
+    - name: zfs-kmod
+      state: disabled

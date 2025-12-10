@@ -1,16 +1,16 @@
 ---
 
 - name: Create filesystems
-  filesystem:
+  community.general.filesystem:
     dev: "{{ item.dev }}"
     force: "{{ item.force | default(omit) }}"
     fstype: "{{ item.fstype }}"
     opts: "{{ item.opts | default(omit) }}"
     resizefs: "{{ item.resizefs | default(omit) }}"
-  with_items: "{{ filesystems | default([]) }}"
+  loop: "{{ filesystems | default([]) }}"
 
 - name: Create mountpoints
-  file:
+  ansible.builtin.file:
     path: "{{ item.path | default(item.name) }}"
     state: "directory"
     owner: "{{ item.owner | default(omit) }}"
@@ -19,7 +19,7 @@
   with_galaxyproject.general.inheritance_chain: "mounts"
 
 - name: Mount filesystems
-  mount:
+  ansible.posix.mount:
     name: "{{ item.path | default(item.name) }}"
     src: "{{ item.src }}"
     fstype: "{{ item.fstype }}"
@@ -28,7 +28,7 @@
   with_galaxyproject.general.inheritance_chain: "mounts"
 
 - name: Set mountpoint permissions
-  file:
+  ansible.builtin.file:
     path: "{{ item.path | default(item.name) }}"
     state: "directory"
     owner: "{{ item.owner | default(omit) }}"
@@ -36,8 +36,26 @@
     mode: "{{ item.mode | default(omit) }}"
   with_galaxyproject.general.inheritance_chain: "mounts"
 
+- name: Include ZFS install tasks
+  ansible.builtin.include_tasks: "install_zfs_{{ ansible_os_family | lower }}.yml"
+  when: "ansible_system == 'Linux' and lookup('galaxyproject.general.inheritance_chain', 'zfs_filesystems') is truthy"
+
+- name: Create ZFS zpools
+  community.general.zpool:
+    altroot: "{{ item.altroot | default(omit) }}"
+    disable_new_features: "{{ item.disable_new_features | default(omit) }}"
+    filesystem_properties: "{{ item.filesystem_properties | default(omit) }}"
+    force: "{{ item.force | default(omit) }}"
+    mountpoint: "{{ item.mountpoint | default(omit) }}"
+    name: "{{ item.name }}"
+    pool_properties: "{{ item.pool_properties | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    temp_name: "{{ item.temp_name | default(omit) }}"
+    vdevs: "{{ item.vdevs }}"
+  loop: "{{ zfs_zpools | default([]) }}"
+
 - name: Create ZFS filesystems
-  zfs:
+  community.general.zfs:
     name: "{{ item.name }}"
     state: "{{ item.state | default('present') }}"
     extra_zfs_properties:
@@ -76,39 +94,45 @@
       vscan: "{{ item.vscan | default(omit) }}"
       xattr: "{{ item.xattr | default(omit) }}"
       zoned: "{{ item.zoned | default(omit) }}"
-  with_items: "{{ zfs_filesystems | default([]) }}"
+  loop: "{{ zfs_filesystems | default([]) }}"
   environment:
     PATH: /native/sbin:{{ ansible_env.PATH }}
 
 - name: Set ZFS mountpoint permissions
-  file:
+  ansible.builtin.file:
     path: "{{ item.mountpoint | default('/' + item.name ) }}"
     state: "directory"
     owner: "{{ item.owner | default('root') }}"
     group: "{{ item.group | default('root') }}"
     mode: "{{ item.mode | default('0755') }}"
-  with_items: "{{ zfs_filesystems | default([]) }}"
+  loop: "{{ zfs_filesystems | default([]) }}"
   when: item.mountpoint is not defined or item.mountpoint.startswith('/')
 
 - name: Set ZFS administrative permissions
-  zfs_delegate_admin:
+  community.general.zfs_delegate_admin:
     name: "{{ item.name }}"
     state: "{{ item.state | default('present') }}"
     users: "{{ item.users | default(omit) }}"
     groups: "{{ item.groups | default(omit) }}"
     permissions: "{{ item.permissions | default(omit) }}"
-  with_items: "{{ zfs_admin_permissions | default([]) }}"
+  loop: "{{ zfs_admin_permissions | default([]) }}"
 
-# TODO: this could go after directories to make sure parents are created, but then you can't use directories to set
-# ownership/permissions on the subvolume
 - name: Create btrfs subvolumes
-  command: "btrfs subvolume create {{ item.path }}"
-  args:
-    creates: "{{ item.path }}"
+  community.general.btrfs_subvolume:
+    automount: "{{ item.automount | default(omit) }}"
+    default: "{{ item.default | default(omit) }}"
+    filesystem_device: "{{ item.filesystem_device | default(omit) }}"
+    filesystem_label: "{{ item.filesystem_label | default(omit) }}"
+    filesystem_uuid: "{{ item.filesystem_uuid | default(omit) }}"
+    name: "{{ item.name | default(item.path) }}"
+    recursive: "{{ item.recursive | default(omit) }}"
+    snapshot_conflict: "{{ item.snapshot_conflict | default(omit) }}"
+    snapshot_source: "{{ item.snapshot_source | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
   with_galaxyproject.general.inheritance_chain: "btrfs_subvolumes"
 
 - name: Create directories
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     owner: "{{ item.owner | default(omit) }}"
     group: "{{ item.group | default(omit) }}"
@@ -118,7 +142,7 @@
   with_galaxyproject.general.inheritance_chain: "directories"
 
 - name: Create links
-  file:
+  ansible.builtin.file:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
     owner: "{{ item.owner | default(omit) }}"

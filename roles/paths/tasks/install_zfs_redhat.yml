@@ -1,0 +1,24 @@
+---
+
+- name: Install rpm key
+  ansible.builtin.rpm_key:
+    key: https://raw.githubusercontent.com/zfsonlinux/zfsonlinux.github.com/master/zfs-release/RPM-GPG-KEY-openzfs-key2
+    fingerprint: 7DC7 299D CF7C 7FD9 CD87 701B A599 FD5E 9DB8 4141
+
+- name: Install zfs-release package
+  ansible.builtin.dnf:
+    name: "https://zfsonlinux.org/epel/zfs-release-{{ zfs_on_linux_release_version }}.el{{ ansible_distribution_major_version }}.noarch.rpm"
+
+- name: Install dnf config-manager
+  ansible.builtin.dnf:
+    name: "dnf-command(config-manager)"
+
+- name: Enable correct repository for install type
+  community.general.dnf_config_manager:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+  loop: "{{ zfs_on_linux_repo_states }}"
+
+- name: Install zfs package
+  ansible.builtin.dnf:
+    name: "{{ zfs_on_linux_package_name }}"
