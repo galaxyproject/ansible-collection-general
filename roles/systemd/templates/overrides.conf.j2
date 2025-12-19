@@ -2,6 +2,12 @@
 ;; This file is managed by Ansible.  ALL CHANGES WILL BE OVERWRITTEN.
 ;;
 [{{ item.unit_type | default("service") | title }}]
+{% if item.override is not string and item.override is not mapping and item.override is iterable %}
+{% for item in item.override %}
+{{ item }}
+{% endfor %}
+{% else %}
 {% for key in item.override %}
 {{ key }}={{ item.override[key] }}
 {% endfor %}
+{% endif %}
