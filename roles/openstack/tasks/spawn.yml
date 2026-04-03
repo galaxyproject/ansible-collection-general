@@ -22,6 +22,7 @@
     meta: "group={{ group_names[0] }}"
     boot_from_volume: "{{ os_boot_from_volume | default(omit) }}"
     volume_size: "{{ os_volume_size | default(omit) }}"
+    terminate_volume: "{{ os_terminate_volume | default(omit) }}"
     #volumes: "{{ os_volumes | default(omit) }}"
     #volumes: "{{ os_volumes }}"
     timeout: "{{ openstack_spawn_timeout | default(omit) }}"
