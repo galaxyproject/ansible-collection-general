@@ -1,8 +1,10 @@
 ---
 
-- name: Update cache and ensure apt-transport-https is installed
+- name: Update cache and ensure bootstrap packages are installed
   ansible.builtin.apt:
-    pkg: apt-transport-https
+    pkg:
+      - apt-transport-https
+      - gnupg
     update_cache: yes
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
