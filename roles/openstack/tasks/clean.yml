@@ -4,6 +4,7 @@
   ansible.builtin.file:
     path: "{{ playbook_dir }}/clouds.yaml"
     state: absent
+  check_mode: false
   delegate_to: localhost
   run_once: true
   become: false
@@ -13,6 +14,7 @@
     path: "{{ playbook_dir }}/{{ item.dest }}"
     state: absent
   loop: "{{ os_secrets | default([]) }}"
+  check_mode: false
   delegate_to: localhost
   run_once: yes
   no_log: yes

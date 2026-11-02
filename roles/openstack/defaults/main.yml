@@ -7,3 +7,10 @@ openstack_manage_secrets: true
 
 # timeout value for spawn ansible.builtin.wait_for_connection task
 openstack_wait_timeout: 120
+
+# Neutron creates these on every new group; a group with default_egress: false has them removed
+os_security_group_default_egress_rules:
+  - direction: egress
+    ether_type: IPv4
+  - direction: egress
+    ether_type: IPv6

@@ -1,25 +1,30 @@
 ---
 
-- name: Create network
+- name: Create networks
   openstack.cloud.network:
     cloud: "{{ os_cloud_id }}"
-    name: "{{ os_network.name }}"
+    name: "{{ item.name }}"
+  loop: "{{ os_networks | default([os_network]) }}"
   delegate_to: localhost
   run_once: true
 
-- name: Create subnet
+- name: Create subnets
   openstack.cloud.subnet:
-    network_name: "{{ os_network.name }}"
-    name: "{{ os_network.subnet.name }}"
-    cidr: "{{ os_network.subnet.cidr }}"
+    network_name: "{{ item.name }}"
+    name: "{{ item.subnet.name }}"
+    cidr: "{{ item.subnet.cidr }}"
+  loop: "{{ os_networks | default([os_network]) }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   delegate_to: localhost
   run_once: true
 
 - name: Create router
   openstack.cloud.router:
-    name: "{{ os_network.router.name }}"
-    network: "{{ os_network.router.network }}"
-    interfaces: "{{ os_network.router.interfaces }}"
+    name: "{{ _os_router.name }}"
+    network: "{{ _os_router.network }}"
+    interfaces: "{{ _os_router.interfaces }}"
+  vars:
+    _os_router: "{{ os_router | default(os_network.router) }}"
   delegate_to: localhost
   run_once: true
 
@@ -31,15 +36,13 @@
   delegate_to: localhost
   run_once: true
 
-- name: Create security group rules
-  openstack.cloud.security_group_rule:
+- name: Set security group rules
+  openstack.cloud.security_group:
     cloud: "{{ os_cloud_id }}"
-    security_group: "{{ item.0.name }}"
-    protocol: "{{ item.1.protocol | default(omit) }}"
-    remote_ip_prefix: "{{ item.1.remote_ip_prefix | default(omit) }}"
-    port_range_min: "{{ item.1.port_range_min | default(omit) }}"
-    port_range_max: "{{ item.1.port_range_max | default(omit) }}"
-  loop: "{{ os_security_group_rules | subelements('rules') }}"
+    name: "{{ item.name }}"
+    security_group_rules: "{{ item.rules + (item.default_egress | default(true) | ternary(os_security_group_default_egress_rules, [])) }}"
+  loop: "{{ os_security_group_rules }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   delegate_to: localhost
   run_once: true
 

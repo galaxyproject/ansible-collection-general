@@ -11,7 +11,7 @@
 
     - include_tasks: initialize.yml
       when:
-        - os_network is defined
+        - os_network is defined or os_networks is defined
         - os_security_group_rules is defined
 
     - include_tasks: spawn.yml
