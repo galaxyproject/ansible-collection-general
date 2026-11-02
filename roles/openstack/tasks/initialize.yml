@@ -42,3 +42,19 @@
   loop: "{{ os_security_group_rules | subelements('rules') }}"
   delegate_to: localhost
   run_once: true
+
+- name: Manage network RBAC policies
+  openstack.cloud.neutron_rbac_policy:
+    id: "{{ item.id | default(omit) }}"
+    action: "{{ item.action | default(omit) }}"
+    interface: "{{ item.interface | default(omit) }}"
+    object_id: "{{ item.object_id | default(omit) }}"
+    object_type: "{{ item.object_type | default(omit) }}"
+    project_id: "{{ item.project_id | default(omit) }}"
+    state: "{{ item.state | default(omit) }}"
+    target_all_project: "{{ item.target_all_project | default(omit) }}"
+    target_project_id: "{{ item.target_project_id | default(omit) }}"
+  loop: "{{ os_neutron_rbac_policies }}"
+  when: "os_neutron_rbac_policies is defined"
+  delegate_to: localhost
+  run_once: true
